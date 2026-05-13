@@ -1,0 +1,55 @@
+{
+    "name": "@mariodebono/di-electron",
+    "version": "1.0.0",
+    "description": "Electron DI app bootstrapper",
+    "private": false,
+    "type": "module",
+    "files": [
+        "dist/**/*"
+    ],
+    "exports": {
+        ".": "./dist/index.mjs",
+        "./renderer": "./dist/renderer.mjs",
+        "./package.json": "./package.json"
+    },
+    "author": {
+        "name": "Mario Debono",
+        "url": "https://github.com/mariodebono"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/mariodebono/di-workspace.git",
+        "directory": "packages/electron"
+    },
+    "homepage": "https://github.com/mariodebono/di-workspace/tree/main/packages/electron#readme",
+    "bugs": {
+        "url": "https://github.com/mariodebono/di-workspace/issues"
+    },
+    "keywords": [
+        "electron",
+        "dependency-injection",
+        "typescript",
+        "ipc",
+        "desktop"
+    ],
+    "publishConfig": {
+        "access": "public"
+    },
+    "license": "MPL-2.0",
+    "engines": {
+        "node": ">=20"
+    },
+    "scripts": {
+        "build": "tsdown",
+        "check": "tsc --noEmit",
+        "prepack": "pnpm run build"
+    },
+    "dependencies": {
+        "electron-log": "catalog:",
+        "reflect-metadata": "catalog:"
+    },
+    "peerDependencies": {
+        "@mariodebono/di": "workspace:*",
+        "electron": "catalog:"
+    }
+}

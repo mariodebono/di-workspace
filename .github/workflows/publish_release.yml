@@ -1,0 +1,75 @@
+name: publish_release
+
+on:
+    workflow_dispatch:
+        inputs:
+            branch:
+                description: Branch to release from
+                required: true
+                type: string
+                default: main
+            prerelease:
+                description: Mark the GitHub release as a prerelease
+                required: false
+                type: boolean
+                default: false
+
+permissions:
+    contents: write
+
+jobs:
+    publish:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+              with:
+                  ref: ${{ inputs.branch }}
+                  fetch-depth: 0
+
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 10
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+                  registry-url: https://registry.npmjs.org/
+                  scope: "@mariodebono"
+                  cache: pnpm
+
+            - name: Determine release version
+              id: version
+              run: |
+                  version=$(node -e "const fs=require('fs'); const path=require('path'); const packageFiles=fs.readdirSync('packages', {withFileTypes:true}).filter((entry)=>entry.isDirectory()).map((entry)=>path.join('packages', entry.name, 'package.json')).filter((file)=>fs.existsSync(file)); if (packageFiles.length===0) { throw new Error('No workspace package manifests found'); } const versions=packageFiles.map((file)=>JSON.parse(fs.readFileSync(file, 'utf8')).version); const uniqueVersions=[...new Set(versions)]; if (uniqueVersions.length!==1) { throw new Error('Workspace packages must share one version, found: ' + uniqueVersions.join(', ')); } process.stdout.write(uniqueVersions[0]);")
+                  echo "version=$version" >> "$GITHUB_OUTPUT"
+                  echo "tag=v$version" >> "$GITHUB_OUTPUT"
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Build packages
+              run: pnpm -r build
+
+            - name: Publish packages
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+              run: pnpm -r --filter "./packages/*" publish --access public --no-git-checks
+
+            - name: Create release tag
+              run: |
+                  git config user.name "github-actions[bot]"
+                  git config user.email "github-actions[bot]@users.noreply.github.com"
+                  git tag -a "${{ steps.version.outputs.tag }}" -m "Release ${{ steps.version.outputs.tag }}"
+                  git push origin "${{ steps.version.outputs.tag }}"
+
+            - name: Create GitHub release
+              uses: softprops/action-gh-release@v2
+              with:
+                  tag_name: ${{ steps.version.outputs.tag }}
+                  target_commitish: ${{ inputs.branch }}
+                  generate_release_notes: true
+                  prerelease: ${{ inputs.prerelease }}

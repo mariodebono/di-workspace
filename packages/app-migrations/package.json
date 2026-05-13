@@ -1,0 +1,54 @@
+{
+    "name": "@mariodebono/di-app-migrations",
+    "version": "1.0.0",
+    "description": "Application bootstrap migrations for the DI system",
+    "private": false,
+    "type": "module",
+    "files": [
+        "dist/**/*"
+    ],
+    "exports": {
+        ".": "./dist/index.mjs",
+        "./package.json": "./package.json"
+    },
+    "author": {
+        "name": "Mario Debono",
+        "url": "https://github.com/mariodebono"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/mariodebono/di-workspace.git",
+        "directory": "packages/app-migrations"
+    },
+    "homepage": "https://github.com/mariodebono/di-workspace/tree/main/packages/app-migrations#readme",
+    "bugs": {
+        "url": "https://github.com/mariodebono/di-workspace/issues"
+    },
+    "keywords": [
+        "migrations",
+        "application-bootstrap",
+        "dependency-injection",
+        "typescript"
+    ],
+    "publishConfig": {
+        "access": "public"
+    },
+    "license": "MPL-2.0",
+    "engines": {
+        "node": ">=20"
+    },
+    "scripts": {
+        "check": "tsc --noEmit",
+        "build": "tsdown",
+        "prepack": "pnpm run build"
+    },
+    "dependencies": {
+        "reflect-metadata": "catalog:"
+    },
+    "devDependencies": {
+        "@types/node": "catalog:"
+    },
+    "peerDependencies": {
+        "@mariodebono/di": "workspace:*"
+    }
+}

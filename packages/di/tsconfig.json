@@ -1,0 +1,12 @@
+{
+    "extends": "../../tsconfig.base.json",
+    "compilerOptions": {
+        "rootDir": "",
+        "target": "esnext",
+        "declaration": true,
+        "module": "nodenext",
+        "experimentalDecorators": true,
+        "types": ["node"]
+    },
+    "include": ["src"]
+}

@@ -1,0 +1,60 @@
+{
+    "name": "@mariodebono/di-electron-i18n",
+    "version": "1.0.0",
+    "description": "Electron DI i18n module",
+    "private": false,
+    "type": "module",
+    "files": [
+        "dist/**/*"
+    ],
+    "exports": {
+        ".": "./dist/index.mjs",
+        "./renderer": "./dist/renderer.mjs",
+        "./package.json": "./package.json"
+    },
+    "author": {
+        "name": "Mario Debono",
+        "url": "https://github.com/mariodebono"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/mariodebono/di-workspace.git",
+        "directory": "packages/electron-i18n"
+    },
+    "homepage": "https://github.com/mariodebono/di-workspace/tree/main/packages/electron-i18n#readme",
+    "bugs": {
+        "url": "https://github.com/mariodebono/di-workspace/issues"
+    },
+    "keywords": [
+        "electron",
+        "i18n",
+        "i18next",
+        "dependency-injection",
+        "typescript"
+    ],
+    "publishConfig": {
+        "access": "public"
+    },
+    "license": "MPL-2.0",
+    "engines": {
+        "node": ">=20"
+    },
+    "scripts": {
+        "build": "tsdown",
+        "check": "tsc --noEmit",
+        "prepack": "pnpm run build"
+    },
+    "dependencies": {
+        "reflect-metadata": "catalog:"
+    },
+    "devDependencies": {
+        "@types/node": "catalog:"
+    },
+    "peerDependencies": {
+        "electron-log": "catalog:",
+        "@mariodebono/di": "workspace:*",
+        "@mariodebono/di-electron": "workspace:*",
+        "electron": "catalog:",
+        "i18next": "catalog:"
+    }
+}

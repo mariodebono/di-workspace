@@ -1,0 +1,49 @@
+{
+    "name": "@mariodebono/di",
+    "version": "1.0.0",
+    "description": "A TypeScript DI system",
+    "private": false,
+    "type": "module",
+    "files": [
+        "dist/**/*"
+    ],
+    "exports": {
+        ".": "./dist/index.mjs",
+        "./package.json": "./package.json"
+    },
+    "author": {
+        "name": "Mario Debono",
+        "url": "https://github.com/mariodebono"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/mariodebono/di-workspace.git",
+        "directory": "packages/di"
+    },
+    "homepage": "https://github.com/mariodebono/di-workspace/tree/main/packages/di#readme",
+    "bugs": {
+        "url": "https://github.com/mariodebono/di-workspace/issues"
+    },
+    "keywords": [
+        "dependency-injection",
+        "typescript",
+        "di",
+        "decorators",
+        "ioc"
+    ],
+    "publishConfig": {
+        "access": "public"
+    },
+    "license": "MPL-2.0",
+    "engines": {
+        "node": ">=20"
+    },
+    "scripts": {
+        "build": "tsdown",
+        "check": "tsc --noEmit",
+        "prepack": "pnpm run build"
+    },
+    "dependencies": {
+        "reflect-metadata": "catalog:"
+    }
+}

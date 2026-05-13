@@ -1,0 +1,58 @@
+{
+    "name": "@mariodebono/di-workspace",
+    "version": "0.0.0",
+    "description": "Dependency injection packages for TypeScript and Electron applications",
+    "private": true,
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/mariodebono/di-workspace.git"
+    },
+    "homepage": "https://github.com/mariodebono/di-workspace#readme",
+    "bugs": {
+        "url": "https://github.com/mariodebono/di-workspace/issues"
+    },
+    "scripts": {
+        "test:unit": "vitest run",
+        "test:unit:coverage": "vitest run --coverage",
+        "test:watch": "vitest",
+        "check": "pnpm -r check",
+        "lint": "biome check --write",
+        "format": "biome format --write",
+        "lint:report": "biome check --reporter=summary --diagnostic-level=error",
+        "build:all": "pnpm -r run build",
+        "prechangeset": "pnpm run build:all && pnpm run check && pnpm run lint:report && pnpm run test:unit",
+        "changeset": "changeset"
+    },
+    "keywords": [
+        "dependency-injection",
+        "typescript",
+        "electron",
+        "di",
+        "decorators"
+    ],
+    "author": {
+        "name": "Mario Debono",
+        "url": "https://github.com/mariodebono"
+    },
+    "license": "MPL-2.0",
+    "engines": {
+        "node": ">=20"
+    },
+    "packageManager": "pnpm@11.1.1",
+    "devDependencies": {
+        "@biomejs/biome": "catalog:",
+        "@changesets/cli": "catalog:",
+        "@types/node": "catalog:",
+        "@vitest/coverage-v8": "catalog:",
+        "publint": "catalog:",
+        "tsdown": "catalog:",
+        "typescript": "catalog:",
+        "vitest": "catalog:"
+    },
+    "dependencies": {
+        "electron": "catalog:",
+        "electron-log": "catalog:",
+        "i18next": "catalog:",
+        "reflect-metadata": "catalog:"
+    }
+}

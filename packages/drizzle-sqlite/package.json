@@ -1,0 +1,53 @@
+{
+    "name": "@mariodebono/di-drizzle-sqlite",
+    "version": "1.0.0",
+    "description": "SQLite integration for the DI system",
+    "private": false,
+    "type": "module",
+    "files": [
+        "dist/**/*"
+    ],
+    "exports": {
+        ".": "./dist/index.mjs",
+        "./package.json": "./package.json"
+    },
+    "author": {
+        "name": "Mario Debono",
+        "url": "https://github.com/mariodebono"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/mariodebono/di-workspace.git",
+        "directory": "packages/drizzle-sqlite"
+    },
+    "homepage": "https://github.com/mariodebono/di-workspace/tree/main/packages/drizzle-sqlite#readme",
+    "bugs": {
+        "url": "https://github.com/mariodebono/di-workspace/issues"
+    },
+    "keywords": [
+        "drizzle",
+        "sqlite",
+        "libsql",
+        "dependency-injection",
+        "typescript"
+    ],
+    "publishConfig": {
+        "access": "public"
+    },
+    "license": "MPL-2.0",
+    "engines": {
+        "node": ">=20"
+    },
+    "scripts": {
+        "build": "tsdown",
+        "check": "tsc --noEmit",
+        "prepack": "pnpm run build"
+    },
+    "dependencies": {},
+    "peerDependencies": {
+        "reflect-metadata": "catalog:",
+        "@libsql/client": "catalog:",
+        "drizzle-orm": "catalog:",
+        "@mariodebono/di": "workspace:*"
+    }
+}

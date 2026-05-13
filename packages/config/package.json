@@ -1,0 +1,51 @@
+{
+    "name": "@mariodebono/di-config",
+    "version": "1.0.0",
+    "description": "DI system configuration module",
+    "private": false,
+    "type": "module",
+    "files": [
+        "dist/**/*"
+    ],
+    "exports": {
+        ".": "./dist/index.mjs",
+        "./package.json": "./package.json"
+    },
+    "author": {
+        "name": "Mario Debono",
+        "url": "https://github.com/mariodebono"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/mariodebono/di-workspace.git",
+        "directory": "packages/config"
+    },
+    "homepage": "https://github.com/mariodebono/di-workspace/tree/main/packages/config#readme",
+    "bugs": {
+        "url": "https://github.com/mariodebono/di-workspace/issues"
+    },
+    "keywords": [
+        "configuration",
+        "dependency-injection",
+        "typescript",
+        "config"
+    ],
+    "publishConfig": {
+        "access": "public"
+    },
+    "license": "MPL-2.0",
+    "engines": {
+        "node": ">=20"
+    },
+    "scripts": {
+        "build": "tsdown",
+        "check": "tsc --noEmit",
+        "prepack": "pnpm run build"
+    },
+    "peerDependencies": {
+        "@mariodebono/di": "workspace:*"
+    },
+    "devDependencies": {
+        "reflect-metadata": "catalog:"
+    }
+}

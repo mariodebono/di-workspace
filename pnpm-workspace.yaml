@@ -1,0 +1,25 @@
+packages:
+  - "packages/*"
+
+allowBuilds:
+  electron: true
+  esbuild: true
+
+catalog:
+  "@libsql/client": "^0.17.2"
+  "@types/node": ^24
+  "drizzle-orm": "^0.45.2"
+  "electron": "^41.2.1"
+  "electron-log": "^5.4.3"
+  "i18next": "^26.0.6"
+  "reflect-metadata": "^0.2.2"
+
+  "vitest": "^4.1.4"
+  "@biomejs/biome": "^2.4.12"
+  "@vitest/coverage-v8": "^4.1.4"
+  "publint": "^0.3.18"
+  "tsdown": "^0.21.9"
+  "@changesets/cli": "^2.31.0"
+  "typescript": "^6.0.3"
+
+catalogMode: prefer
