@@ -12,7 +12,7 @@ npm install @mariodebono/di reflect-metadata
 
 ## Requirements
 
-- Node.js 20 or newer
+- Node.js 24 or newer
 - An ESM-capable runtime or build pipeline
 - TypeScript legacy decorators enabled when using decorator APIs
 - `reflect-metadata` loaded before decorated classes are imported or instantiated

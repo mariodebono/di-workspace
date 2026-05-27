@@ -12,7 +12,7 @@ npm install @mariodebono/di-config @mariodebono/di reflect-metadata
 
 ## Requirements
 
-- Node.js 20 or newer
+- Node.js 24 or newer
 - `@mariodebono/di` as a peer dependency
 - `reflect-metadata` loaded before decorated classes are imported or instantiated
 - The same ESM and decorator setup required by `@mariodebono/di`

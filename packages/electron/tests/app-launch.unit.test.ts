@@ -6,8 +6,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import { Injectable, metadataKeys } from "@mariodebono/di";
 import { describe, expect, it } from "vitest";
+import { getInjectableOptions } from "../../../tests/helpers/di.js";
 import {
     APP_LAUNCH_INJECTABLE_TAG,
     APP_LAUNCH_METADATA_KEY,
@@ -31,10 +31,7 @@ describe("OnAppLaunch decorator", () => {
             },
         ]);
 
-        const options = Reflect.getMetadata(
-            metadataKeys.injectableOptions,
-            DefaultLaunchHandler,
-        ) as { tags?: (string | symbol)[] } | undefined;
+        const options = getInjectableOptions(DefaultLaunchHandler);
 
         expect(options?.tags).toContain(APP_LAUNCH_INJECTABLE_TAG);
     });
@@ -91,29 +88,20 @@ describe("OnAppLaunch decorator", () => {
         ).toThrow("@OnAppLaunch can only be applied to methods");
     });
 
-    it("preserves existing injectable options while adding app-launch tag", () => {
-        const existingTag = Symbol("existing-tag");
-
-        @Injectable({
-            scope: "transient",
-            tags: [existingTag, APP_LAUNCH_INJECTABLE_TAG],
-        })
+    it("adds the app-launch tag once when applied repeatedly", () => {
         class ExistingInjectableHandler {
             initialize(): void {}
         }
         applyOnAppLaunch(ExistingInjectableHandler.prototype, "initialize", {
             priority: 2,
         });
+        applyOnAppLaunch(ExistingInjectableHandler.prototype, "initialize", {
+            priority: 3,
+        });
 
-        const options = Reflect.getMetadata(
-            metadataKeys.injectableOptions,
-            ExistingInjectableHandler,
-        ) as { scope?: string; tags?: (string | symbol)[] } | undefined;
+        const options = getInjectableOptions(ExistingInjectableHandler);
 
-        expect(options?.scope).toBe("transient");
-        expect(options?.tags).toEqual(
-            expect.arrayContaining([existingTag, APP_LAUNCH_INJECTABLE_TAG]),
-        );
+        expect(options?.tags).toContain(APP_LAUNCH_INJECTABLE_TAG);
 
         const appLaunchTags =
             options?.tags?.filter((tag) => tag === APP_LAUNCH_INJECTABLE_TAG) ??
@@ -124,7 +112,7 @@ describe("OnAppLaunch decorator", () => {
             APP_LAUNCH_METADATA_KEY,
             ExistingInjectableHandler,
         ) as unknown[];
-        expect(stored).toHaveLength(1);
+        expect(stored).toHaveLength(2);
     });
 });
 

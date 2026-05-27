@@ -12,7 +12,7 @@ npm install @mariodebono/di-electron-i18n @mariodebono/di @mariodebono/di-electr
 
 ## Requirements
 
-- Node.js 20 or newer
+- Node.js 24 or newer
 - An ESM-capable Electron main-process build
 - TypeScript legacy decorators enabled when using decorator APIs
 - `@mariodebono/di`, `@mariodebono/di-electron`, `electron`, `electron-log`, and `i18next` as peer dependencies

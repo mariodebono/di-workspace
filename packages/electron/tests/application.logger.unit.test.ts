@@ -10,9 +10,6 @@ import { app as electronApp } from "electron/main";
 import { describe, expect, it, vi } from "vitest";
 
 const diCoreMocks = vi.hoisted(() => ({
-    Injectable: () => (target: unknown) => target,
-    Logger: class Logger {},
-    Module: () => (target: unknown) => target,
     createApplication: vi.fn(),
 }));
 
@@ -70,7 +67,17 @@ vi.mock("electron", () => ({
     },
 }));
 
-vi.mock("@mariodebono/di", () => diCoreMocks);
+vi.mock("@mariodebono/di", async () => {
+    const actual =
+        await vi.importActual<typeof import("@mariodebono/di")>(
+            "@mariodebono/di",
+        );
+
+    return {
+        ...actual,
+        createApplication: diCoreMocks.createApplication,
+    };
+});
 vi.mock("electron-log", () => ({
     default: {
         create: electronLogMocks.create,

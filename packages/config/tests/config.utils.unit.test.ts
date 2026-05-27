@@ -6,7 +6,6 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import { ModuleRef } from "@mariodebono/di";
 import { describe, expect, it } from "vitest";
 import { ConfigService } from "../src/config.service.js";
 import type { ConfigFactory } from "../src/config.types.js";
@@ -20,7 +19,7 @@ import {
 } from "../src/config.utils.js";
 
 type NamespaceProvider = {
-    useFactory: (moduleRef: Pick<ModuleRef, "get">) => unknown;
+    useFactory: (moduleRef: { get<T>(token: unknown): T }) => unknown;
 };
 
 describe("config utils", () => {
@@ -249,8 +248,14 @@ describe("config utils", () => {
         expect(providers).toHaveLength(1);
         expect(providers[0]).toMatchObject({
             provide: databaseConfig.TOKEN,
-            inject: [ModuleRef],
         });
+        expect(
+            (
+                providers[0] as {
+                    inject?: Array<{ name?: string }>;
+                }
+            ).inject?.[0]?.name,
+        ).toBe("ModuleRef");
     });
 
     it("namespace provider resolves through ConfigService and throws when root config is missing", () => {
@@ -272,12 +277,12 @@ describe("config utils", () => {
                 }
                 throw new Error(`Unexpected token: ${String(token)}`);
             },
-        } as Pick<ModuleRef, "get">;
+        };
         const missingModuleRef = {
             get<T>(): T {
                 throw new Error("missing");
             },
-        } as Pick<ModuleRef, "get">;
+        };
 
         expect(provider.useFactory(moduleRefWithConfig)).toEqual({
             url: "file:///tmp/app.db",

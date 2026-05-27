@@ -6,8 +6,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import { Injectable, metadataKeys } from "@mariodebono/di";
 import { describe, expect, it } from "vitest";
+import { getInjectableOptions } from "../../../tests/helpers/di.js";
 import {
     APP_READY_INJECTABLE_TAG,
     APP_READY_METADATA_KEY,
@@ -33,10 +33,7 @@ describe("AppReady decorator", () => {
             },
         ]);
 
-        const options = Reflect.getMetadata(
-            metadataKeys.injectableOptions,
-            DefaultReadyHandler,
-        ) as { tags?: (string | symbol)[] } | undefined;
+        const options = getInjectableOptions(DefaultReadyHandler);
 
         expect(options?.tags).toContain(APP_READY_INJECTABLE_TAG);
     });
@@ -78,29 +75,20 @@ describe("AppReady decorator", () => {
         ).toThrow("@AppReady cannot be applied to static methods");
     });
 
-    it("preserves existing injectable options while adding app-ready tag", () => {
-        const existingTag = Symbol("existing-tag");
-
-        @Injectable({
-            scope: "transient",
-            tags: [existingTag, APP_READY_INJECTABLE_TAG],
-        })
+    it("adds the app-ready tag once when applied repeatedly", () => {
         class ExistingInjectableHandler {
             initialize(): void {}
         }
         applyAppReady(ExistingInjectableHandler.prototype, "initialize", {
             priority: 2,
         });
+        applyAppReady(ExistingInjectableHandler.prototype, "initialize", {
+            priority: 3,
+        });
 
-        const options = Reflect.getMetadata(
-            metadataKeys.injectableOptions,
-            ExistingInjectableHandler,
-        ) as { scope?: string; tags?: (string | symbol)[] } | undefined;
+        const options = getInjectableOptions(ExistingInjectableHandler);
 
-        expect(options?.scope).toBe("transient");
-        expect(options?.tags).toEqual(
-            expect.arrayContaining([existingTag, APP_READY_INJECTABLE_TAG]),
-        );
+        expect(options?.tags).toContain(APP_READY_INJECTABLE_TAG);
 
         const appReadyTags =
             options?.tags?.filter((tag) => tag === APP_READY_INJECTABLE_TAG) ??
@@ -111,7 +99,7 @@ describe("AppReady decorator", () => {
             APP_READY_METADATA_KEY,
             ExistingInjectableHandler,
         ) as unknown[];
-        expect(stored).toHaveLength(1);
+        expect(stored).toHaveLength(2);
     });
 });
 

@@ -12,13 +12,8 @@ import {
     type IContainer,
     ModuleRef,
 } from "../src/container.js";
-import {
-    forwardRef,
-    Inject,
-    Injectable,
-    Optional,
-    REQUEST_CONTEXT,
-} from "../src/index.js";
+import { forwardRef, Inject, Injectable, Optional } from "../src/decorators.js";
+import { REQUEST_CONTEXT } from "../src/types.js";
 
 function setCtorParamTypes(target: object, types: unknown[]): void {
     Reflect.defineMetadata("design:paramtypes", types, target);

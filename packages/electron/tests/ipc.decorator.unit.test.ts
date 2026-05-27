@@ -6,8 +6,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import { metadataKeys } from "@mariodebono/di";
 import { describe, expect, it } from "vitest";
+import { getInjectableOptions } from "../../../tests/helpers/di.js";
 import {
     BridgeController,
     CONTROLLER_INJECTABLE_TAG,
@@ -24,10 +24,7 @@ describe("IPC decorators", () => {
         @BridgeController({ namespace: "test" })
         class TestController {}
 
-        const options = Reflect.getMetadata(
-            metadataKeys.injectableOptions,
-            TestController,
-        ) as { tags?: (string | symbol)[] } | undefined;
+        const options = getInjectableOptions(TestController);
 
         expect(options?.tags).toContain(CONTROLLER_INJECTABLE_TAG);
         expect(

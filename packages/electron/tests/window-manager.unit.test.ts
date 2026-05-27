@@ -6,9 +6,9 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import type { Logger } from "@mariodebono/di";
 import { app as electronApp } from "electron";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { Logger } from "../../di/src/logger.service.js";
 import { WindowManagerService } from "../src/window-manager.js";
 
 const electronMocks = vi.hoisted(() => {

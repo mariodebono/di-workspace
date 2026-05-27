@@ -17,10 +17,10 @@ This repository publishes ESM packages under the `@mariodebono` scope. The found
 
 ## Requirements
 
-- Node.js 20 or newer
+- Node.js 24 or newer
 - TypeScript with legacy decorators enabled when using decorator APIs
 - `reflect-metadata` loaded before decorated classes are imported or instantiated
-- pnpm 10 for repository development
+- pnpm 11 for repository development
 
 The published packages provide ESM `.mjs` entry points and `.d.mts` type declarations. CommonJS `require()` entry points are not published.
 
@@ -125,6 +125,7 @@ pnpm run check
 pnpm run lint:report
 pnpm run build:all
 pnpm run test:unit
+pnpm run test:integration
 pnpm -r exec publint
 ```
 
@@ -140,7 +141,7 @@ This workspace uses Changesets and publishes the packages as a coordinated relea
 
 1. Create a changeset with `pnpm changeset`.
 2. Update package versions with `pnpm changeset version`.
-3. Run `pnpm run prechangeset` and `pnpm -r exec publint`.
+3. Run `pnpm run prechangeset`.
 4. Publish with `pnpm changeset publish` after authenticating to npm.
 
 The workspace root is private and is not published. Individual package manifests are configured for public npm release.
