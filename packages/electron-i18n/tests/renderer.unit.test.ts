@@ -8,64 +8,6 @@
 
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@mariodebono/di-electron/renderer", () => ({
-    createRendererBridge: (transport: {
-        invoke: (channel: string, ...args: unknown[]) => Promise<unknown>;
-    }) =>
-        new Proxy(
-            {},
-            {
-                get: (_target, propertyKey: string | symbol) => {
-                    return async (...args: unknown[]) => {
-                        const response = await transport.invoke(
-                            String(propertyKey),
-                            ...args,
-                        );
-
-                        if (
-                            response &&
-                            typeof response === "object" &&
-                            "success" in response
-                        ) {
-                            if (!(response as { success: boolean }).success) {
-                                throw new Error("IPC communication failed");
-                            }
-
-                            return (response as unknown as { data: unknown })
-                                .data;
-                        }
-
-                        return response;
-                    };
-                },
-            },
-        ),
-    createRendererEvents: (transport: {
-        on: (channel: string, listener: (...args: unknown[]) => void) => void;
-        off: (channel: string, listener: (...args: unknown[]) => void) => void;
-    }) => ({
-        on: transport.on,
-        off: transport.off,
-    }),
-    getDefaultRendererTransport: () => {
-        if (typeof window === "undefined") {
-            throw new Error(
-                "The DI Electron renderer bridge is only available in a browser window",
-            );
-        }
-
-        const transport = (window as { __di_electron__?: MockTransport })
-            .__di_electron__;
-        if (!transport) {
-            throw new Error(
-                "The DI Electron preload bridge is not available on this window",
-            );
-        }
-
-        return transport;
-    },
-}));
-
 import {
     createI18nRendererBridge,
     createI18nRendererEvents,

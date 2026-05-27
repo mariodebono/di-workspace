@@ -6,8 +6,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import { metadataKeys } from "@mariodebono/di";
 import { describe, expect, it, vi } from "vitest";
+import { getInjectableOptions } from "../../../tests/helpers/di.js";
 
 import {
     createI18nLocaleChangedHookRunner,
@@ -50,10 +50,7 @@ describe("I18n locale changed hooks", () => {
             },
         ]);
 
-        const injectableOptions = Reflect.getMetadata(
-            metadataKeys.injectableOptions,
-            LocaleChangedHandler,
-        ) as { tags?: unknown[] } | undefined;
+        const injectableOptions = getInjectableOptions(LocaleChangedHandler);
 
         expect(injectableOptions?.tags).toHaveLength(1);
     });

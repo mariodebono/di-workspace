@@ -1,0 +1,31 @@
+{
+    "extends": "./tsconfig.base.json",
+    "compilerOptions": {
+        "target": "esnext",
+        "module": "esnext",
+        "moduleResolution": "bundler",
+        "noEmit": true,
+        "types": ["node", "vitest/globals"],
+        "paths": {
+            "@mariodebono/di": ["./packages/di/src/index.ts"],
+            "@mariodebono/di-app-migrations": [
+                "./packages/app-migrations/src/index.ts"
+            ],
+            "@mariodebono/di-config": ["./packages/config/src/index.ts"],
+            "@mariodebono/di-drizzle-sqlite": [
+                "./packages/drizzle-sqlite/src/index.ts"
+            ],
+            "@mariodebono/di-electron": ["./packages/electron/src/index.ts"],
+            "@mariodebono/di-electron/renderer": [
+                "./packages/electron/src/renderer/index.ts"
+            ],
+            "@mariodebono/di-electron-i18n": [
+                "./packages/electron-i18n/src/index.ts"
+            ],
+            "@mariodebono/di-electron-i18n/renderer": [
+                "./packages/electron-i18n/src/renderer.ts"
+            ]
+        }
+    },
+    "include": ["tests/**/*.ts", "vitest*.config.ts"]
+}

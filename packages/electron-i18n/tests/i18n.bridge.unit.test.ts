@@ -8,17 +8,15 @@
 
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@mariodebono/di-electron", () => ({
-    BridgeController: () => (target: unknown) => target,
-    createIpcHandleTyped:
-        () =>
-        () =>
-        (
-            _target: object,
-            _propertyKey: string | symbol,
-            descriptor?: PropertyDescriptor,
-        ) =>
-            descriptor,
+vi.mock("electron/main", () => ({
+    app: {},
+    Menu: {},
+}));
+
+vi.mock("electron", () => ({
+    BrowserWindow: class BrowserWindow {},
+    dialog: {},
+    shell: {},
 }));
 
 import { I18nBridgeController } from "../src/i18n.bridge.js";

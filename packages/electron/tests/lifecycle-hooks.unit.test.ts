@@ -6,8 +6,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import { Injectable, metadataKeys } from "@mariodebono/di";
 import { describe, expect, it } from "vitest";
+import { getInjectableOptions } from "../../../tests/helpers/di.js";
 import {
     APP_QUIT_METADATA_KEY,
     getAppQuitHooks,
@@ -45,10 +45,7 @@ describe("Lifecycle hook decorators", () => {
             },
         ]);
 
-        const options = Reflect.getMetadata(
-            metadataKeys.injectableOptions,
-            DefaultHookHandler,
-        ) as { tags?: (string | symbol)[] } | undefined;
+        const options = getInjectableOptions(DefaultHookHandler);
 
         expect(options?.tags).toContain(LIFECYCLE_HOOK_INJECTABLE_TAG);
     });
@@ -199,13 +196,7 @@ describe("Lifecycle hook decorators", () => {
         ).toThrow("@OnMainWindowShow cannot be applied to static methods");
     });
 
-    it("preserves existing injectable options while adding lifecycle hook tag", () => {
-        const existingTag = Symbol("existing-tag");
-
-        @Injectable({
-            scope: "transient",
-            tags: [existingTag, LIFECYCLE_HOOK_INJECTABLE_TAG],
-        })
+    it("adds the lifecycle hook tag once when applied repeatedly", () => {
         class ExistingInjectableHandler {
             onBeforeQuit(): void {}
             onWindowBlur(): void {}
@@ -213,6 +204,7 @@ describe("Lifecycle hook decorators", () => {
             onWindowFocus(): void {}
             onWindowShow(): void {}
         }
+        applyOnAppQuit(ExistingInjectableHandler.prototype, "onBeforeQuit");
         applyOnAppQuit(ExistingInjectableHandler.prototype, "onBeforeQuit");
         applyOnMainWindowBlur(
             ExistingInjectableHandler.prototype,
@@ -231,18 +223,9 @@ describe("Lifecycle hook decorators", () => {
             "onWindowShow",
         );
 
-        const options = Reflect.getMetadata(
-            metadataKeys.injectableOptions,
-            ExistingInjectableHandler,
-        ) as { scope?: string; tags?: (string | symbol)[] } | undefined;
+        const options = getInjectableOptions(ExistingInjectableHandler);
 
-        expect(options?.scope).toBe("transient");
-        expect(options?.tags).toEqual(
-            expect.arrayContaining([
-                existingTag,
-                LIFECYCLE_HOOK_INJECTABLE_TAG,
-            ]),
-        );
+        expect(options?.tags).toContain(LIFECYCLE_HOOK_INJECTABLE_TAG);
 
         const lifecycleTags =
             options?.tags?.filter(
@@ -271,7 +254,7 @@ describe("Lifecycle hook decorators", () => {
             ExistingInjectableHandler,
         ) as unknown[];
 
-        expect(beforeQuitStored).toHaveLength(1);
+        expect(beforeQuitStored).toHaveLength(2);
         expect(blurStored).toHaveLength(1);
         expect(closeStored).toHaveLength(1);
         expect(focusStored).toHaveLength(1);

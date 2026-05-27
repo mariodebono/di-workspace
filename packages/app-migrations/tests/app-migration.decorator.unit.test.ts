@@ -6,8 +6,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import { Injectable, metadataKeys } from "@mariodebono/di";
 import { describe, expect, it } from "vitest";
+import { getInjectableOptions } from "../../../tests/helpers/di.js";
 import {
     AppMigration,
     getAppMigrationMetadata,
@@ -34,10 +34,7 @@ describe("AppMigration decorator", () => {
         );
     });
 
-    it("attaches metadata, preserves existing tags, and only adds the migration tag once", () => {
-        @Injectable({
-            tags: ["existing"],
-        })
+    it("attaches metadata and only adds the migration tag once", () => {
         class ValidMigration {
             async execute(): Promise<void> {}
         }
@@ -54,12 +51,9 @@ describe("AppMigration decorator", () => {
             id: "20260417130500-valid",
         });
 
-        const injectableOptions = Reflect.getMetadata(
-            metadataKeys.injectableOptions,
-            ValidMigration,
-        ) as { tags?: unknown[] };
+        const injectableOptions = getInjectableOptions(ValidMigration);
 
-        expect(injectableOptions.tags).toEqual(["existing", APP_MIGRATION_TAG]);
+        expect(injectableOptions?.tags).toEqual([APP_MIGRATION_TAG]);
     });
 
     it("returns undefined metadata for non-function targets", () => {

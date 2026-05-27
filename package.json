@@ -12,15 +12,17 @@
         "url": "https://github.com/mariodebono/di-workspace/issues"
     },
     "scripts": {
-        "test:unit": "vitest run",
-        "test:unit:coverage": "vitest run --coverage",
+        "test": "pnpm run test:unit && pnpm run build:all && pnpm run check && pnpm run test:integration",
+        "test:unit": "vitest run --config vitest.unit.config.ts",
+        "test:unit:coverage": "vitest run --config vitest.unit.config.ts --coverage",
+        "test:integration": "vitest run --config vitest.integration.config.ts",
         "test:watch": "vitest",
         "check": "pnpm -r check",
         "lint": "biome check --write",
         "format": "biome format --write",
         "lint:report": "biome check --reporter=summary --diagnostic-level=error",
         "build:all": "pnpm -r run build",
-        "prechangeset": "pnpm run build:all && pnpm run check && pnpm run lint:report && pnpm run test:unit",
+        "prechangeset": "pnpm run lint:report && pnpm run test && pnpm -r exec publint",
         "changeset": "changeset"
     },
     "keywords": [
