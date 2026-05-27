@@ -1,6 +1,6 @@
 {
     "name": "@mariodebono/di-electron-i18n",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Electron DI i18n module",
     "private": false,
     "type": "module",
