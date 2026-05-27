@@ -12,7 +12,7 @@ npm install @mariodebono/di-drizzle-sqlite @mariodebono/di @libsql/client drizzl
 
 ## Requirements
 
-- Node.js 20 or newer
+- Node.js 24 or newer
 - `@mariodebono/di` as a peer dependency
 - `@libsql/client`, `drizzle-orm`, and `reflect-metadata` as peer dependencies
 - The same ESM and decorator setup required by `@mariodebono/di`
