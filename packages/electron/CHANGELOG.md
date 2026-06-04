@@ -1,5 +1,13 @@
 # @mariodebono/di-electron
 
+## 1.0.2
+
+### Patch Changes
+
+- fix(electron): update dependency versions in pnpm-workspace.yaml
+- Updated dependencies
+  - @mariodebono/di@1.0.2
+
 ## 1.0.1
 
 ### Patch Changes
