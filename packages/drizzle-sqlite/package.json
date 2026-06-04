@@ -1,6 +1,6 @@
 {
     "name": "@mariodebono/di-drizzle-sqlite",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "SQLite integration for the DI system",
     "private": false,
     "type": "module",
