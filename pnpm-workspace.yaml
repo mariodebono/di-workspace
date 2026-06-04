@@ -7,18 +7,18 @@ allowBuilds:
 
 catalog:
   "@libsql/client": "^0.17.2"
-  "@types/node": ^24
+  "@types/node": ^24.12.4
   "drizzle-orm": "^0.45.2"
-  "electron": "^42.2.0"
+  "electron": "^41.7.1"
   "electron-log": "^5.4.4"
-  "i18next": "^26.2.0"
+  "i18next": "^26.3.0"
   "reflect-metadata": "^0.2.2"
 
-  "vitest": "^4.1.7"
-  "@biomejs/biome": "^2.4.15"
-  "@vitest/coverage-v8": "^4.1.7"
+  "vitest": "^4.1.8"
+  "@biomejs/biome": "^2.4.16"
+  "@vitest/coverage-v8": "^4.1.8"
   "publint": "^0.3.21"
-  "tsdown": "^0.22.0"
+  "tsdown": "^0.22.1"
   "@changesets/cli": "^2.31.0"
   "typescript": "^6.0.3"
 
