@@ -15,12 +15,24 @@ const electronMocks = vi.hoisted(() => {
     class MockBrowserWindow {
         static instances: MockBrowserWindow[] = [];
 
+        private currentUrl = "";
+        readonly mainFrame = { url: "" };
+        readonly webContents = {
+            getURL: vi.fn(() => this.currentUrl),
+            mainFrame: this.mainFrame,
+        };
         readonly close = vi.fn();
         readonly focus = vi.fn();
         readonly isDestroyed = vi.fn().mockReturnValue(false);
         readonly isMinimized = vi.fn().mockReturnValue(false);
-        readonly loadFile = vi.fn().mockResolvedValue(undefined);
-        readonly loadURL = vi.fn().mockResolvedValue(undefined);
+        readonly loadFile = vi.fn(async (filePath: string) => {
+            this.currentUrl = `file:///${filePath}`;
+            this.mainFrame.url = this.currentUrl;
+        });
+        readonly loadURL = vi.fn(async (url: string) => {
+            this.currentUrl = url;
+            this.mainFrame.url = url;
+        });
         readonly minimize = vi.fn();
         readonly once = vi.fn();
         readonly restore = vi.fn();
@@ -133,6 +145,98 @@ describe("WindowManagerService", () => {
         expect(window.loadFile).toHaveBeenCalledWith(
             "dist/renderer/index.html",
         );
+    });
+
+    it("trusts only managed main frames on the configured web origin", async () => {
+        const service = createWindowManager();
+
+        await service.createWindow({
+            url: "https://example.com/dashboard",
+        });
+        const [window] = electronMocks.BrowserWindow.instances;
+        if (!window) {
+            throw new Error("Expected mocked BrowserWindow instance");
+        }
+
+        expect(
+            service.isTrustedIpcSender(
+                window.webContents as never,
+                window.mainFrame as never,
+            ),
+        ).toBe(true);
+
+        window.mainFrame.url = "https://example.com/settings#/appearance";
+        expect(
+            service.isTrustedIpcSender(
+                window.webContents as never,
+                window.mainFrame as never,
+            ),
+        ).toBe(true);
+
+        expect(
+            service.isTrustedIpcSender(
+                window.webContents as never,
+                { url: window.mainFrame.url } as never,
+            ),
+        ).toBe(false);
+
+        window.mainFrame.url = "https://malicious.example/settings";
+        expect(
+            service.isTrustedIpcSender(
+                window.webContents as never,
+                window.mainFrame as never,
+            ),
+        ).toBe(false);
+        expect(
+            service.isTrustedIpcSender(
+                {
+                    mainFrame: window.mainFrame,
+                } as never,
+                window.mainFrame as never,
+            ),
+        ).toBe(false);
+
+        window.mainFrame.url = "https://example.com/dashboard";
+        const closedListener = window.once.mock.calls.find(
+            ([event]) => event === "closed",
+        )?.[1] as (() => void) | undefined;
+        closedListener?.();
+        expect(
+            service.isTrustedIpcSender(
+                window.webContents as never,
+                window.mainFrame as never,
+            ),
+        ).toBe(false);
+    });
+
+    it("allows file routes only within the configured renderer file", async () => {
+        const service = createWindowManager();
+
+        await service.createWindow({
+            url: "#/dashboard",
+            basePath: "file:///tmp/app/dist/renderer/index.html",
+        });
+        const [window] = electronMocks.BrowserWindow.instances;
+        if (!window) {
+            throw new Error("Expected mocked BrowserWindow instance");
+        }
+
+        window.mainFrame.url =
+            "file:///tmp/app/dist/renderer/index.html#/settings";
+        expect(
+            service.isTrustedIpcSender(
+                window.webContents as never,
+                window.mainFrame as never,
+            ),
+        ).toBe(true);
+
+        window.mainFrame.url = "file:///tmp/app/dist/renderer/other.html";
+        expect(
+            service.isTrustedIpcSender(
+                window.webContents as never,
+                window.mainFrame as never,
+            ),
+        ).toBe(false);
     });
 
     it("reveals the main window by restoring, showing, and focusing it", async () => {

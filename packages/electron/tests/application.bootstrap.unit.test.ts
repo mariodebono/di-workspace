@@ -30,6 +30,13 @@ const electronLogMocks = vi.hoisted(() => ({
     })),
 }));
 
+const ipcMocks = vi.hoisted(() => ({
+    composedValidator: vi.fn(),
+    controllerTag: Symbol("bridge-controller"),
+    createIpcEventValidator: vi.fn(),
+    registerIpcControllers: vi.fn(),
+}));
+
 vi.mock("electron/main", () => ({
     app: {
         exit: vi.fn(),
@@ -82,6 +89,14 @@ vi.mock("electron-log", () => ({
     default: {
         create: electronLogMocks.create,
     },
+}));
+
+vi.mock("../src/ipc.js", () => ({
+    CONTROLLER_INJECTABLE_TAG: ipcMocks.controllerTag,
+    createIpcEventValidator: ipcMocks.createIpcEventValidator.mockReturnValue(
+        ipcMocks.composedValidator,
+    ),
+    registerIpcControllers: ipcMocks.registerIpcControllers,
 }));
 
 describe("application bootstrap", () => {
@@ -150,9 +165,11 @@ describe("application bootstrap", () => {
         const { createElectronApplication } = await import(
             "../src/application.js"
         );
+        const additionalValidator = vi.fn();
 
         const result = await createElectronApplication(class EntryModule {}, {
             logger: logger as never,
+            ipcEventValidator: additionalValidator,
         });
 
         expect(result.status).toBe("started");
@@ -164,6 +181,15 @@ describe("application bootstrap", () => {
                 error: expect.any(Function),
                 warn: expect.any(Function),
             }),
+        );
+        expect(ipcMocks.createIpcEventValidator).toHaveBeenCalledWith(
+            windowManager,
+            additionalValidator,
+        );
+        expect(ipcMocks.registerIpcControllers).toHaveBeenCalledWith(
+            [],
+            application,
+            ipcMocks.composedValidator,
         );
         await result.application.destroyAsync();
     });

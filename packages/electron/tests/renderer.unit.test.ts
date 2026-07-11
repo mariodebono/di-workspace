@@ -11,6 +11,7 @@ import { IpcError } from "../src/ipc-error.js";
 import {
     createRendererBridge,
     createRendererEvents,
+    getPathForFile,
 } from "../src/renderer/index.js";
 
 describe("renderer bridge", () => {
@@ -27,6 +28,7 @@ describe("renderer bridge", () => {
             invoke,
             on: vi.fn(),
             off: vi.fn(),
+            getPathForFile: vi.fn(),
         });
 
         await expect(api.projects.list()).resolves.toEqual([
@@ -51,6 +53,7 @@ describe("renderer bridge", () => {
             }),
             on: vi.fn(),
             off: vi.fn(),
+            getPathForFile: vi.fn(),
         });
 
         await expect(api.projects.remove("project-1")).rejects.toBeInstanceOf(
@@ -63,6 +66,7 @@ describe("renderer bridge", () => {
             invoke: vi.fn(),
             on: vi.fn(),
             off: vi.fn(),
+            getPathForFile: vi.fn(),
         };
         const events = createRendererEvents(transport);
         const listener = vi.fn();
@@ -74,6 +78,31 @@ describe("renderer bridge", () => {
         expect(transport.off).toHaveBeenCalledWith(
             "projects.updated",
             listener,
+        );
+    });
+
+    it("returns native file paths through the preload transport", () => {
+        const file = { name: "project.godot" } as File;
+        const transport = {
+            invoke: vi.fn(),
+            on: vi.fn(),
+            off: vi.fn(),
+            getPathForFile: vi.fn().mockReturnValue("/projects/project.godot"),
+        };
+
+        expect(getPathForFile(file, transport)).toBe("/projects/project.godot");
+        expect(transport.getPathForFile).toHaveBeenCalledWith(file);
+    });
+
+    it("reports when a custom transport cannot resolve native file paths", () => {
+        expect(() =>
+            getPathForFile({ name: "project.godot" } as File, {
+                invoke: vi.fn(),
+                on: vi.fn(),
+                off: vi.fn(),
+            }),
+        ).toThrow(
+            "The DI Electron preload bridge does not support native file paths",
         );
     });
 });

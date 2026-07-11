@@ -6,11 +6,6 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-/*
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at https://mozilla.org/MPL/2.0/.
- */
 export {
     type CreateElectronApplicationOptions,
     type CreateElectronApplicationResult,
@@ -44,6 +39,7 @@ export {
     ElectronLogger,
     type ElectronLoggerOptions,
 } from "./electron-logger.js";
+export type { IpcEventValidator } from "./ipc.js";
 export {
     DEFAULT_IPC_ERROR_MESSAGE,
     DEFAULT_IPC_ERROR_TYPE,

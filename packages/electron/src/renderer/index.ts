@@ -36,6 +36,20 @@ export function createRendererEvents(
     };
 }
 
+/** Return the native filesystem path for a renderer File object. */
+export function getPathForFile(
+    file: File,
+    transport: RendererIpcTransport = getDefaultRendererTransport(),
+): string {
+    if (!transport.getPathForFile) {
+        throw new Error(
+            "The DI Electron preload bridge does not support native file paths",
+        );
+    }
+
+    return transport.getPathForFile(file);
+}
+
 export function getDefaultRendererTransport(): RendererIpcTransport {
     if (typeof window === "undefined") {
         throw new Error(

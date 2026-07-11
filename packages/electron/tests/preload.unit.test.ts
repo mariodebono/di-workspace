@@ -17,6 +17,9 @@ const electronMocks = vi.hoisted(() => ({
         on: vi.fn(),
         removeListener: vi.fn(),
     },
+    webUtils: {
+        getPathForFile: vi.fn(),
+    },
 }));
 
 vi.mock("electron", () => electronMocks);
@@ -28,6 +31,7 @@ describe("preload bridge", () => {
         electronMocks.ipcRenderer.invoke.mockReset();
         electronMocks.ipcRenderer.on.mockReset();
         electronMocks.ipcRenderer.removeListener.mockReset();
+        electronMocks.webUtils.getPathForFile.mockReset();
     });
 
     it("exposes a narrow IPC transport and routes on/off listeners", async () => {
@@ -41,6 +45,7 @@ describe("preload bridge", () => {
                 invoke: expect.any(Function),
                 on: expect.any(Function),
                 off: expect.any(Function),
+                getPathForFile: expect.any(Function),
             }),
         );
 
@@ -61,6 +66,16 @@ describe("preload bridge", () => {
         expect(electronMocks.ipcRenderer.removeListener).toHaveBeenCalledWith(
             "projects.updated",
             wrappedListener,
+        );
+
+        const file = { name: "project.godot" } as File;
+        electronMocks.webUtils.getPathForFile.mockReturnValue(
+            "/projects/project.godot",
+        );
+
+        expect(bridge.getPathForFile(file)).toBe("/projects/project.godot");
+        expect(electronMocks.webUtils.getPathForFile).toHaveBeenCalledWith(
+            file,
         );
     });
 });

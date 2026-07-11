@@ -6,11 +6,6 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-/*
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at https://mozilla.org/MPL/2.0/.
- */
 import {
     type Application,
     type Constructor,
@@ -38,7 +33,12 @@ import {
     createElectronLogger,
     type ElectronLoggerOptions,
 } from "./electron-logger.js";
-import { CONTROLLER_INJECTABLE_TAG, registerIpcControllers } from "./ipc.js";
+import {
+    CONTROLLER_INJECTABLE_TAG,
+    createIpcEventValidator,
+    type IpcEventValidator,
+    registerIpcControllers,
+} from "./ipc.js";
 import { createLifecycleHookRunner } from "./lifecycle-hook-runner.js";
 import { ElectronModule } from "./module.js";
 import {
@@ -59,6 +59,8 @@ export interface CreateElectronApplicationOptions
     mainWindowOptions?: CreateWindowOptions;
     /** Configuration passed to the Electron logger adapter. */
     loggerOptions?: ElectronLoggerOptions;
+    /** Applies additional IPC validation after the package sender checks pass. */
+    ipcEventValidator?: IpcEventValidator;
 }
 
 /** Result returned by the Electron application bootstrap. */
@@ -197,7 +199,11 @@ export async function createElectronApplication<T>(
         logger = application.get(Logger);
         const controllers = application.findByTag(CONTROLLER_INJECTABLE_TAG);
 
-        registerIpcControllers(controllers, application);
+        registerIpcControllers(
+            controllers,
+            application,
+            createIpcEventValidator(windowManager, options?.ipcEventValidator),
+        );
         launchCoordinator.setInvocations(
             collectAppLaunchInvocations(application),
         );
