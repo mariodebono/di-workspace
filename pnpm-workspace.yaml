@@ -9,7 +9,7 @@ catalog:
   "@libsql/client": "^0.17.2"
   "@types/node": ^24.12.4
   "drizzle-orm": "^0.45.2"
-  "electron": "^41.7.1"
+  "electron": "^42.6.1"
   "electron-log": "^5.4.4"
   "i18next": "^26.3.0"
   "reflect-metadata": "^0.2.2"

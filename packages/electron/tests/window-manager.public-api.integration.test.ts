@@ -12,8 +12,20 @@ const electronMocks = vi.hoisted(() => {
     class MockBrowserWindow {
         static instances: MockBrowserWindow[] = [];
 
-        readonly loadURL = vi.fn().mockResolvedValue(undefined);
-        readonly loadFile = vi.fn().mockResolvedValue(undefined);
+        private currentUrl = "";
+        readonly mainFrame = { url: "" };
+        readonly webContents = {
+            getURL: vi.fn(() => this.currentUrl),
+            mainFrame: this.mainFrame,
+        };
+        readonly loadURL = vi.fn(async (url: string) => {
+            this.currentUrl = url;
+            this.mainFrame.url = url;
+        });
+        readonly loadFile = vi.fn(async (filePath: string) => {
+            this.currentUrl = `file:///${filePath}`;
+            this.mainFrame.url = this.currentUrl;
+        });
         readonly once = vi.fn();
         readonly close = vi.fn();
         readonly focus = vi.fn();

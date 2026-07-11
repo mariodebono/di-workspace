@@ -13,9 +13,9 @@
  */
 import type { Application, ProviderToken } from "@mariodebono/di";
 
-import { ipcMain } from "electron";
+import { type IpcMainInvokeEvent, ipcMain } from "electron";
 import "reflect-metadata";
-import { serializeIpcError } from "./ipc-error.js";
+import { IpcError, serializeIpcError } from "./ipc-error.js";
 import {
     createIpcErrorResponse,
     createIpcSuccessResponse,
@@ -32,11 +32,40 @@ export {
     IpcHandleTyped,
 } from "./decorators/ipc.decorator.js";
 
+/** Validates an incoming IPC invocation before its controller method runs. */
+export type IpcEventValidator = (
+    event: IpcMainInvokeEvent,
+    channel: string,
+) => void | Promise<void>;
+
+class InvalidIpcSenderError extends IpcError {
+    constructor() {
+        super("electron.invalid_ipc_sender", "Invalid IPC sender");
+    }
+}
+
 import type { HandlerMetadata } from "./decorators/ipc.decorator.js";
 import {
     CONTROLLER_METADATA_KEY,
     IPC_HANDLER_METADATA_KEY,
 } from "./decorators/ipc.decorator.js";
+import type { WindowManagerService } from "./window-manager.js";
+
+/** Creates the package IPC validator with optional additional consumer rules. */
+export function createIpcEventValidator(
+    windowManager: Pick<WindowManagerService, "isTrustedIpcSender">,
+    additionalValidator?: IpcEventValidator,
+): IpcEventValidator {
+    return async (event, channel) => {
+        if (
+            !windowManager.isTrustedIpcSender(event.sender, event.senderFrame)
+        ) {
+            throw new InvalidIpcSenderError();
+        }
+
+        await additionalValidator?.(event, channel);
+    };
+}
 
 /**
  * Registers all IPC handlers defined on bridge controllers with Electron's ipcMain.
@@ -47,6 +76,7 @@ import {
 export function registerIpcControllers(
     controllers: ProviderToken[],
     container: Application,
+    validateEvent: IpcEventValidator,
 ): void {
     for (const controller of controllers) {
         const handlers =
@@ -61,8 +91,9 @@ export function registerIpcControllers(
                 ? `${namespace}.${handler.channel}`
                 : handler.channel;
 
-            ipcMain.handle(channel, async (_event, ...args) => {
+            ipcMain.handle(channel, async (event, ...args) => {
                 try {
+                    await validateEvent(event, channel);
                     // biome-ignore lint/suspicious/noExplicitAny: Allow explicit any for method call
                     const result = await (instance as any)[handler.methodName](
                         ...args,

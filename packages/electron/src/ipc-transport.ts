@@ -19,4 +19,5 @@ export type RendererIpcTransport = {
     invoke(channel: string, ...args: unknown[]): Promise<unknown>;
     on(channel: string, listener: RendererIpcListener): void;
     off(channel: string, listener: RendererIpcListener): void;
+    getPathForFile?(file: File): string;
 };

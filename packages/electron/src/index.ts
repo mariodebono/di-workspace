@@ -44,6 +44,7 @@ export {
     ElectronLogger,
     type ElectronLoggerOptions,
 } from "./electron-logger.js";
+export type { IpcEventValidator } from "./ipc.js";
 export {
     DEFAULT_IPC_ERROR_MESSAGE,
     DEFAULT_IPC_ERROR_TYPE,

@@ -11,7 +11,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
-import { contextBridge, ipcRenderer } from "electron";
+import { contextBridge, ipcRenderer, webUtils } from "electron";
 import {
     DI_ELECTRON_IPC_GLOBAL,
     type RendererIpcListener,
@@ -57,6 +57,9 @@ const transport: RendererIpcTransport = {
 
         ipcRenderer.removeListener(channel, wrappedListener);
         channelListeners?.delete(listener);
+    },
+    getPathForFile(file) {
+        return webUtils.getPathForFile(file);
     },
 };
 

@@ -11,6 +11,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const { handle } = vi.hoisted(() => ({
     handle: vi.fn(),
 }));
+const allowAllIpcEvents = vi.fn().mockResolvedValue(undefined);
 
 vi.mock("electron", () => ({
     ipcMain: {
@@ -45,9 +46,13 @@ describe("registerIpcControllers", () => {
             IpcHandle,
         );
 
-        registerIpcControllers([TestController], {
-            get: () => new TestController(),
-        } as never);
+        registerIpcControllers(
+            [TestController],
+            {
+                get: () => new TestController(),
+            } as never,
+            allowAllIpcEvents,
+        );
 
         const handler = handle.mock.calls[0]?.[1] as
             | ((event: unknown) => Promise<unknown>)
@@ -101,9 +106,13 @@ describe("registerIpcControllers", () => {
             IpcHandle,
         );
 
-        registerIpcControllers([TestController], {
-            get: () => new TestController(),
-        } as never);
+        registerIpcControllers(
+            [TestController],
+            {
+                get: () => new TestController(),
+            } as never,
+            allowAllIpcEvents,
+        );
 
         const handler = handle.mock.calls[0]?.[1] as
             | ((event: unknown) => Promise<unknown>)
@@ -148,9 +157,13 @@ describe("registerIpcControllers", () => {
             IpcHandle,
         );
 
-        registerIpcControllers([TestController], {
-            get: () => new TestController(),
-        } as never);
+        registerIpcControllers(
+            [TestController],
+            {
+                get: () => new TestController(),
+            } as never,
+            allowAllIpcEvents,
+        );
 
         const handler = handle.mock.calls[0]?.[1] as
             | ((event: unknown) => Promise<unknown>)
@@ -179,9 +192,13 @@ describe("registerIpcControllers", () => {
             }
         }
 
-        registerIpcControllers([NoHandlersController], {
-            get: vi.fn(),
-        } as never);
+        registerIpcControllers(
+            [NoHandlersController],
+            {
+                get: vi.fn(),
+            } as never,
+            allowAllIpcEvents,
+        );
 
         expect(handle).not.toHaveBeenCalled();
     });
@@ -212,14 +229,138 @@ describe("registerIpcControllers", () => {
             IpcHandleTyped<TestBridge, "ping">,
         );
 
-        registerIpcControllers([TestController], {
-            get: () => new TestController(),
-        } as never);
+        registerIpcControllers(
+            [TestController],
+            {
+                get: () => new TestController(),
+            } as never,
+            allowAllIpcEvents,
+        );
 
         expect(handle).toHaveBeenCalledWith(
             "projects.ping",
             expect.any(Function),
         );
+    });
+
+    it("validates IPC events before invoking controller handlers", async () => {
+        const {
+            createIpcEventValidator,
+            IpcHandleTyped,
+            registerIpcControllers,
+        } = await import("../src/ipc.js");
+        const { BridgeController } = await import(
+            "../src/decorators/ipc.decorator.js"
+        );
+        const ping = vi.fn().mockResolvedValue("pong");
+        const isTrustedIpcSender = vi.fn().mockReturnValue(true);
+        const additionalValidator = vi.fn().mockResolvedValue(undefined);
+        const validateEvent = createIpcEventValidator(
+            { isTrustedIpcSender } as never,
+            additionalValidator,
+        );
+
+        type TestBridge = {
+            ping(): Promise<string>;
+        };
+
+        @BridgeController({ namespace: "projects" })
+        class TestController {
+            async ping(): Promise<string> {
+                return await ping();
+            }
+        }
+
+        applyIpcHandle(
+            TestController.prototype,
+            "ping",
+            "ping",
+            IpcHandleTyped<TestBridge, "ping">,
+        );
+
+        registerIpcControllers(
+            [TestController],
+            {
+                get: () => new TestController(),
+            } as never,
+            validateEvent,
+        );
+
+        const handler = handle.mock.calls[0]?.[1] as
+            | ((event: unknown) => Promise<unknown>)
+            | undefined;
+        const senderFrame = { url: "file:///app/index.html" };
+        const sender = { mainFrame: senderFrame };
+        const event = { sender, senderFrame };
+
+        await expect(handler?.(event)).resolves.toEqual({
+            success: true,
+            data: "pong",
+        });
+        expect(isTrustedIpcSender).toHaveBeenCalledWith(sender, senderFrame);
+        expect(additionalValidator).toHaveBeenCalledWith(
+            event,
+            "projects.ping",
+        );
+        expect(ping).toHaveBeenCalledOnce();
+    });
+
+    it("serializes IPC validation failures without invoking the controller", async () => {
+        const {
+            createIpcEventValidator,
+            IpcHandleTyped,
+            registerIpcControllers,
+        } = await import("../src/ipc.js");
+        const { BridgeController } = await import(
+            "../src/decorators/ipc.decorator.js"
+        );
+        const ping = vi.fn().mockResolvedValue("pong");
+
+        type TestBridge = {
+            ping(): Promise<string>;
+        };
+
+        @BridgeController({ namespace: "projects" })
+        class TestController {
+            async ping(): Promise<string> {
+                return await ping();
+            }
+        }
+
+        applyIpcHandle(
+            TestController.prototype,
+            "ping",
+            "ping",
+            IpcHandleTyped<TestBridge, "ping">,
+        );
+        const additionalValidator = vi.fn();
+
+        registerIpcControllers(
+            [TestController],
+            {
+                get: () => new TestController(),
+            } as never,
+            createIpcEventValidator(
+                {
+                    isTrustedIpcSender: vi.fn().mockReturnValue(false),
+                } as never,
+                additionalValidator,
+            ),
+        );
+
+        const handler = handle.mock.calls[0]?.[1] as
+            | ((event: unknown) => Promise<unknown>)
+            | undefined;
+
+        await expect(handler?.({})).resolves.toEqual({
+            success: false,
+            error: {
+                type: "electron.invalid_ipc_sender",
+                message: "Invalid IPC sender",
+            },
+        });
+        expect(additionalValidator).not.toHaveBeenCalled();
+        expect(ping).not.toHaveBeenCalled();
     });
 });
 

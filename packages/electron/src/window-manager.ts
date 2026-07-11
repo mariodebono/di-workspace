@@ -12,6 +12,8 @@ import {
     app,
     BrowserWindow,
     type BrowserWindowConstructorOptions,
+    type WebContents,
+    type WebFrameMain,
 } from "electron";
 import { getInternalPreloadPath } from "./internal/preload-path.js";
 /** Base path used when resolving relative renderer URLs. */
@@ -35,6 +37,7 @@ export type CreateWindowOptions = Omit<
 @Injectable()
 export class WindowManagerService {
     private readonly windows = new Set<BrowserWindow>();
+    private readonly trustedRendererLocations = new Map<WebContents, string>();
     private mainWindow?: BrowserWindow;
 
     protected readonly logger: Logger;
@@ -68,7 +71,7 @@ export class WindowManagerService {
             this.logger.debug(`Loading local file: ${resolvedUrl}`);
             await window.loadFile(resolvedUrl);
         }
-        this.trackWindow(window);
+        this.trackWindow(window, window.webContents.getURL());
 
         return window;
     }
@@ -144,11 +147,30 @@ export class WindowManagerService {
         }
     }
 
+    /** Returns true when an IPC sender is a managed main frame at its configured renderer location. */
+    isTrustedIpcSender(
+        sender: WebContents,
+        senderFrame: WebFrameMain | null,
+    ): boolean {
+        if (!senderFrame || senderFrame !== sender.mainFrame) {
+            return false;
+        }
+
+        const trustedLocation = this.trustedRendererLocations.get(sender);
+        if (!trustedLocation) {
+            return false;
+        }
+
+        return isSameRendererLocation(senderFrame.url, trustedLocation);
+    }
+
     /** Track a window so it can be cleaned up when closed. */
-    private trackWindow(window: BrowserWindow): void {
+    private trackWindow(window: BrowserWindow, rendererLocation: string): void {
         this.windows.add(window);
+        this.trustedRendererLocations.set(window.webContents, rendererLocation);
         window.once("closed", () => {
             this.windows.delete(window);
+            this.trustedRendererLocations.delete(window.webContents);
             if (window === this.mainWindow) {
                 this.mainWindow = undefined;
             }
@@ -177,5 +199,27 @@ export class WindowManagerService {
     /** Return true when the provided value is an absolute http/file URL. */
     private isAbsoluteUrl(url: string): boolean {
         return /^(https?:|file:)/.test(url);
+    }
+}
+
+function isSameRendererLocation(
+    currentLocation: string,
+    trustedLocation: string,
+): boolean {
+    try {
+        const currentUrl = new URL(currentLocation);
+        const trustedUrl = new URL(trustedLocation);
+
+        if (trustedUrl.protocol === "file:") {
+            return (
+                currentUrl.protocol === "file:" &&
+                currentUrl.host === trustedUrl.host &&
+                currentUrl.pathname === trustedUrl.pathname
+            );
+        }
+
+        return currentUrl.origin === trustedUrl.origin;
+    } catch {
+        return currentLocation === trustedLocation;
     }
 }

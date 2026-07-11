@@ -119,5 +119,6 @@ describe("package exports", () => {
         expect(indexModule).not.toHaveProperty("createRendererBridge");
         expect(rendererModule.createRendererBridge).toBeTypeOf("function");
         expect(rendererModule.createRendererEvents).toBeTypeOf("function");
+        expect(rendererModule.getPathForFile).toBeTypeOf("function");
     });
 });

@@ -152,6 +152,7 @@ If `instanceMode: "single"` is enabled and Electron cannot acquire the single-in
 - `instanceMode?: "multi" | "single"` controls whether a second app instance is allowed
 - `hideOnClose?: boolean` hides the main window instead of quitting when it is closed
 - `mainWindowOptions?: CreateWindowOptions` configures the main `BrowserWindow`
+- `ipcEventValidator?: (event, channel) => void | Promise<void>` applies additional validation after the package sender checks pass
 - `loggerOptions?: ElectronLoggerOptions` configures the built-in `electron-log` adapter
 
 Defaults:
@@ -244,6 +245,8 @@ These hooks are also awaited sequentially and sorted by ascending priority.
 
 IPC is controller-based. Classes marked with `@BridgeController({ namespace })` are discovered from the DI container, then methods marked with `@IpcHandleTyped()` or a decorator created by `createIpcHandleTyped()` are registered through `ipcMain.handle()`.
 
+Before a controller method runs, the package verifies that the sender belongs to a window managed by `WindowManagerService`, that the request comes from its main frame, and that the frame remains on the configured web origin or local renderer file. Invalid senders receive a normalized `electron.invalid_ipc_sender` error. Use `ipcEventValidator` only for additional application-specific rules.
+
 ```ts
 import { BridgeController, createIpcHandleTyped } from "@mariodebono/di-electron";
 
@@ -301,6 +304,8 @@ const locale = await api.app.getLocale();
 The renderer bridge maps nested property access to dotted IPC channels and automatically unwraps successful responses.
 
 The subpath also exports `createRendererEvents()` and `getDefaultRendererTransport()` for tests or specialized transports.
+
+Use `getPathForFile(file)` when a drag-and-drop flow needs the native filesystem path for a browser `File`. The package-owned preload resolves the path through Electron's `webUtils` without exposing `webUtils` directly.
 
 ## Electron Services
 
