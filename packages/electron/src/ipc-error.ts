@@ -6,11 +6,6 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-/*
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at https://mozilla.org/MPL/2.0/.
- */
 /** Default message used when an IPC error does not provide one. */
 export const DEFAULT_IPC_ERROR_MESSAGE = "IPC communication failed";
 /** Default type used when an IPC error does not provide one. */
