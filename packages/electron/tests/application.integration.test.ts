@@ -582,6 +582,7 @@ describe("createElectronApplication", () => {
             expect(options.url).toBe("#/");
             return {
                 hide,
+                isDestroyed: vi.fn().mockReturnValue(false),
                 on: vi.fn().mockImplementation((event, listener) => {
                     if (event === "close") {
                         listeners.close = listener as MainWindowCloseListener;
@@ -630,6 +631,7 @@ describe("createElectronApplication", () => {
             "createMainWindow",
         ).mockResolvedValue({
             hide,
+            isDestroyed: vi.fn().mockReturnValue(false),
             on: vi.fn().mockImplementation((event, listener) => {
                 if (event === "close") {
                     listeners.close = listener as MainWindowCloseListener;
@@ -664,6 +666,66 @@ describe("createElectronApplication", () => {
         await application.destroyAsync();
     });
 
+    it("does not hide a window destroyed by a before-close hook", async () => {
+        const logger = createMockLogger();
+        const listeners: {
+            close?: MainWindowCloseListener;
+        } = {};
+        let destroyed = false;
+        const hide = vi.fn();
+        const isDestroyed = vi.fn(() => destroyed);
+
+        vi.spyOn(electronMainApp, "whenReady").mockResolvedValue(undefined);
+        vi.spyOn(
+            WindowManagerService.prototype,
+            "createMainWindow",
+        ).mockResolvedValue({
+            hide,
+            isDestroyed,
+            on: vi.fn().mockImplementation((event, listener) => {
+                if (event === "close") {
+                    listeners.close = listener as MainWindowCloseListener;
+                }
+            }),
+        } as never);
+        const quitSpy = vi
+            .spyOn(electronMainApp, "quit")
+            .mockImplementation(() => {
+                destroyed = true;
+            });
+
+        @Injectable()
+        class LifecycleHooks {
+            @OnMainWindowClose({ order: LifecycleHookOrder.Before })
+            onCloseBefore(): void {
+                electronMainApp.quit();
+            }
+        }
+
+        @Module({ providers: [LifecycleHooks] })
+        class EntryModule {}
+
+        const application = await startElectronApplication(EntryModule, {
+            logger,
+            hideOnClose: true,
+            mainWindowOptions: {
+                url: "/",
+            },
+        });
+
+        const preventDefault = vi.fn();
+        await requireValue(
+            listeners.close,
+            "Expected close listener to be registered",
+        )({ preventDefault });
+
+        expect(preventDefault).toHaveBeenCalledOnce();
+        expect(quitSpy).toHaveBeenCalledOnce();
+        expect(isDestroyed).toHaveBeenCalledOnce();
+        expect(hide).not.toHaveBeenCalled();
+
+        await application.destroyAsync();
+    });
     it("prevents the main window close synchronously before async before-close hooks resolve", async () => {
         const logger = createMockLogger();
         const listeners: {
@@ -678,6 +740,7 @@ describe("createElectronApplication", () => {
             "createMainWindow",
         ).mockResolvedValue({
             hide,
+            isDestroyed: vi.fn().mockReturnValue(false),
             on: vi.fn().mockImplementation((event, listener) => {
                 if (event === "close") {
                     listeners.close = listener as MainWindowCloseListener;
@@ -744,6 +807,7 @@ describe("createElectronApplication", () => {
             "createMainWindow",
         ).mockResolvedValue({
             hide,
+            isDestroyed: vi.fn().mockReturnValue(false),
             on: vi.fn().mockImplementation((event, listener) => {
                 if (event === "close") {
                     listeners.close = listener as MainWindowCloseListener;
@@ -794,6 +858,7 @@ describe("createElectronApplication", () => {
             "createMainWindow",
         ).mockResolvedValue({
             hide,
+            isDestroyed: vi.fn().mockReturnValue(false),
             on: vi.fn().mockImplementation((event, listener) => {
                 if (event === "close") {
                     listeners.close = listener as MainWindowCloseListener;
@@ -913,6 +978,7 @@ describe("createElectronApplication", () => {
             "createMainWindow",
         ).mockResolvedValue({
             hide,
+            isDestroyed: vi.fn().mockReturnValue(false),
             on: vi.fn().mockImplementation((event, listener) => {
                 if (event === "blur") {
                     listeners.blur = listener as VoidListener;

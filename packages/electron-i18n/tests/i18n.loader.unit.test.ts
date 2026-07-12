@@ -6,6 +6,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const fsMocks = vi.hoisted(() => ({
@@ -33,10 +34,10 @@ describe("I18nLoader", () => {
 
     it("loads normalized locale namespace files and caches the payload", async () => {
         fsMocks.readFile.mockImplementation((filePath: string) => {
-            if (filePath.endsWith("/en-us/common.json")) {
+            if (filePath.endsWith(path.join("en-us", "common.json"))) {
                 return Promise.resolve(JSON.stringify({ greeting: "Hello" }));
             }
-            if (filePath.endsWith("/en-us/app.json")) {
+            if (filePath.endsWith(path.join("en-us", "app.json"))) {
                 return Promise.resolve(
                     JSON.stringify({ welcome: { title: "Launcher" } }),
                 );
@@ -77,7 +78,7 @@ describe("I18nLoader", () => {
         });
 
         await expect(loader.loadLocale("en")).rejects.toThrow(
-            'Failed to load i18n namespace "common" for locale "en" from /locales/en/common.json: missing file',
+            `Failed to load i18n namespace "common" for locale "en" from ${path.join("/locales", "en", "common.json")}: missing file`,
         );
     });
 
