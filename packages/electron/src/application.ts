@@ -298,7 +298,7 @@ export async function createElectronApplication<T>(
                     LifecycleHookOrder.Before,
                 );
 
-                if (isQuitting) {
+                if (isQuitting || mainWindow.isDestroyed()) {
                     await lifecycleRunner.runMainWindowCloseHooks(
                         mainWindowCloseInvocations,
                         LifecycleHookOrder.After,
