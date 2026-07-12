@@ -1,5 +1,13 @@
 # @mariodebono/di-config
 
+## 2.0.0
+
+### Patch Changes
+
+- bdbf21b: Refresh workspace development tooling and make the i18n loader unit tests platform-independent.
+- Updated dependencies [bdbf21b]
+  - @mariodebono/di@2.0.0
+
 ## 1.0.2
 
 ### Patch Changes

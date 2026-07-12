@@ -1,5 +1,17 @@
 # @mariodebono/di-electron-i18n
 
+## 2.0.0
+
+### Patch Changes
+
+- bdbf21b: Refresh workspace development tooling and make the i18n loader unit tests platform-independent.
+- Updated dependencies [b198226]
+- Updated dependencies [bdbf21b]
+- Updated dependencies [bdbf21b]
+- Updated dependencies [bdbf21b]
+  - @mariodebono/di-electron@2.0.0
+  - @mariodebono/di@2.0.0
+
 ## 1.0.2
 
 ### Patch Changes
