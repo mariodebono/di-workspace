@@ -6,6 +6,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+import path from "node:path";
+import { pathToFileURL } from "node:url";
 // biome-ignore lint/style/useImportType: Used for runtime DI resolution.
 import { Injectable, Logger } from "@mariodebono/di";
 import {
@@ -63,6 +65,13 @@ export class WindowManagerService {
             },
         });
         const resolvedUrl = await this.resolveWindowUrl(url, basePath);
+        const trustedRendererLocation = this.isAbsoluteUrl(resolvedUrl)
+            ? resolvedUrl
+            : pathToFileURL(path.resolve(resolvedUrl)).href;
+
+        // Trust the configured destination before navigation starts because the
+        // renderer can invoke IPC while loadURL/loadFile is still in progress.
+        this.trackWindow(window, trustedRendererLocation);
 
         if (this.isAbsoluteUrl(resolvedUrl)) {
             this.logger.debug(`Loading URL: ${resolvedUrl}`);
@@ -71,7 +80,14 @@ export class WindowManagerService {
             this.logger.debug(`Loading local file: ${resolvedUrl}`);
             await window.loadFile(resolvedUrl);
         }
-        this.trackWindow(window, window.webContents.getURL());
+
+        const loadedRendererLocation = window.webContents.getURL();
+        if (loadedRendererLocation) {
+            this.trustedRendererLocations.set(
+                window.webContents,
+                loadedRendererLocation,
+            );
+        }
 
         return window;
     }

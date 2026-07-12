@@ -6,6 +6,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { app as electronApp } from "electron";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Logger } from "../../di/src/logger.service.js";
@@ -14,6 +16,9 @@ import { WindowManagerService } from "../src/window-manager.js";
 const electronMocks = vi.hoisted(() => {
     class MockBrowserWindow {
         static instances: MockBrowserWindow[] = [];
+        static onNavigationStart:
+            | ((window: MockBrowserWindow) => void)
+            | undefined;
 
         private currentUrl = "";
         readonly mainFrame = { url: "" };
@@ -26,12 +31,14 @@ const electronMocks = vi.hoisted(() => {
         readonly isDestroyed = vi.fn().mockReturnValue(false);
         readonly isMinimized = vi.fn().mockReturnValue(false);
         readonly loadFile = vi.fn(async (filePath: string) => {
-            this.currentUrl = `file:///${filePath}`;
+            this.currentUrl = pathToFileURL(path.resolve(filePath)).href;
             this.mainFrame.url = this.currentUrl;
+            MockBrowserWindow.onNavigationStart?.(this);
         });
         readonly loadURL = vi.fn(async (url: string) => {
             this.currentUrl = url;
             this.mainFrame.url = url;
+            MockBrowserWindow.onNavigationStart?.(this);
         });
         readonly minimize = vi.fn();
         readonly once = vi.fn();
@@ -61,6 +68,7 @@ vi.mock("electron", () => electronMocks);
 
 beforeEach(() => {
     electronMocks.BrowserWindow.instances.length = 0;
+    electronMocks.BrowserWindow.onNavigationStart = undefined;
     electronMocks.app.dock.hide.mockClear();
     electronMocks.app.dock.show.mockClear();
     electronMocks.app.focus.mockClear();
@@ -147,6 +155,24 @@ describe("WindowManagerService", () => {
         );
     });
 
+    it.each([
+        ["web URL", "https://example.com/dashboard"],
+        ["local file", "dist/renderer/index.html"],
+    ])("trusts the configured %s while initial navigation is in progress", async (_description, url) => {
+        const service = createWindowManager();
+        let trustedDuringNavigation = false;
+
+        electronMocks.BrowserWindow.onNavigationStart = (window) => {
+            trustedDuringNavigation = service.isTrustedIpcSender(
+                window.webContents as never,
+                window.mainFrame as never,
+            );
+        };
+
+        await service.createWindow({ url });
+
+        expect(trustedDuringNavigation).toBe(true);
+    });
     it("trusts only managed main frames on the configured web origin", async () => {
         const service = createWindowManager();
 
