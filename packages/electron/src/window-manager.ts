@@ -182,11 +182,12 @@ export class WindowManagerService {
 
     /** Track a window so it can be cleaned up when closed. */
     private trackWindow(window: BrowserWindow, rendererLocation: string): void {
+        const webContents = window.webContents;
         this.windows.add(window);
-        this.trustedRendererLocations.set(window.webContents, rendererLocation);
+        this.trustedRendererLocations.set(webContents, rendererLocation);
         window.once("closed", () => {
             this.windows.delete(window);
-            this.trustedRendererLocations.delete(window.webContents);
+            this.trustedRendererLocations.delete(webContents);
             if (window === this.mainWindow) {
                 this.mainWindow = undefined;
             }

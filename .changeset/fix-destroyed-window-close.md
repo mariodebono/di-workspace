@@ -2,4 +2,4 @@
 "@mariodebono/di-electron": patch
 ---
 
-Avoid operating on main windows destroyed by before-close lifecycle hooks.
+Avoid operating on destroyed main windows during close hooks and clean up trusted renderer state safely after windows close.

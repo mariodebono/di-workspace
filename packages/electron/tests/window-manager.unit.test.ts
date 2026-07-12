@@ -235,6 +235,40 @@ describe("WindowManagerService", () => {
         ).toBe(false);
     });
 
+    it("cleans up trusted renderer state without accessing a closed window", async () => {
+        const service = createWindowManager();
+
+        await service.createWindow({
+            url: "https://example.com/dashboard",
+        });
+        const [window] = electronMocks.BrowserWindow.instances;
+        if (!window) {
+            throw new Error("Expected mocked BrowserWindow instance");
+        }
+
+        const webContents = window.webContents;
+        const closedListener = window.once.mock.calls.find(
+            ([event]) => event === "closed",
+        )?.[1] as (() => void) | undefined;
+        if (!closedListener) {
+            throw new Error("Expected closed listener to be registered");
+        }
+
+        Object.defineProperty(window, "webContents", {
+            get: () => {
+                throw new TypeError("Object has been destroyed");
+            },
+        });
+
+        expect(closedListener).not.toThrow();
+        expect(
+            service.isTrustedIpcSender(
+                webContents as never,
+                window.mainFrame as never,
+            ),
+        ).toBe(false);
+    });
+
     it("allows file routes only within the configured renderer file", async () => {
         const service = createWindowManager();
 
