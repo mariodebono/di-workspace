@@ -96,7 +96,7 @@ describe("WindowManagerService", () => {
         expect(firstWindow.loadURL).toHaveBeenCalledWith(
             "http://localhost:3000/#/dashboard",
         );
-        expect(firstWindow.options).toEqual(
+        expect(electronMocks.BrowserWindow.instances[0]?.options).toEqual(
             expect.objectContaining({
                 webPreferences: expect.objectContaining({
                     preload: expect.any(String),
