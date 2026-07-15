@@ -49,12 +49,19 @@ export class I18nLoader {
             return cached;
         }
 
+        const configuredLocale =
+            this.options.supportedLocales
+                .find(
+                    (supportedLocale) =>
+                        normalizeLocale(supportedLocale) === normalizedLocale,
+                )
+                ?.trim() ?? normalizedLocale;
         const resources: I18nResourcesByNamespace = {};
 
         for (const namespace of this.options.namespaces) {
             const filePath = path.join(
                 this.options.localesRoot,
-                normalizedLocale,
+                configuredLocale,
                 `${namespace}.json`,
             );
 

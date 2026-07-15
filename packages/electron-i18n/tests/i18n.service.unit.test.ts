@@ -65,7 +65,7 @@ describe("I18nService", () => {
         const loader = createLoader({
             en: {
                 common: { greeting: "Hello" },
-                app: { title: "Launcher" },
+                APP: { title: "Launcher" },
             },
         });
 
@@ -86,7 +86,7 @@ describe("I18nService", () => {
         expect(service.getFallbackLocale()).toBe("en");
         expect(service.getSystemLocale()).toBe("en");
         expect(service.getSupportedLocales()).toEqual(["en"]);
-        expect(service.getNamespaces()).toEqual(["common", "app"]);
+        expect(service.getNamespaces()).toEqual(["common", "APP"]);
 
         await service.onModuleInit();
 
@@ -95,7 +95,8 @@ describe("I18nService", () => {
                 defaultNS: "common",
                 fallbackLng: "en",
                 lng: "en",
-                ns: ["common", "app"],
+                lowerCaseLng: true,
+                ns: ["common", "APP"],
             }),
         );
         expect(loader.loadLocale).toHaveBeenCalledTimes(1);
@@ -108,7 +109,7 @@ describe("I18nService", () => {
         );
         expect(i18nextMocks.addResourceBundle).toHaveBeenCalledWith(
             "en",
-            "app",
+            "APP",
             { title: "Launcher" },
             true,
             true,
@@ -229,7 +230,7 @@ describe("I18nService", () => {
             createLoader({ en: { common: {} } }),
         );
 
-        const translations = service.useTranslations("COMMON");
+        const translations = service.useTranslations("common");
 
         expect(translations.locale).toBe("en");
         expect(translations.namespace).toBe("common");
@@ -240,6 +241,9 @@ describe("I18nService", () => {
         });
         expect(() => service.useTranslations("missing")).toThrow(
             'Unknown translation namespace "missing". Known namespaces: common',
+        );
+        expect(() => service.useTranslations("COMMON")).toThrow(
+            'Unknown translation namespace "COMMON". Known namespaces: common',
         );
     });
 });

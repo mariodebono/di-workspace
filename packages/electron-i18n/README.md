@@ -69,7 +69,20 @@ Each namespace file must contain a JSON object.
 }
 ```
 
-Locale identifiers are normalized to lowercase, and underscores are treated as hyphens. For example, `en_US` resolves as `en-us`.
+Locale inputs are matched case-insensitively, and underscores are treated as hyphens. Locale directory names use the spelling configured in `supportedLocales`. For example, `pt_br` can resolve to a configured `pt-BR` directory.
+
+Namespace names are case-sensitive and keep the same spelling used in configuration. For example, a namespace named `myFeature` must use `myFeature.json`, and application code must request `myFeature`.
+
+### Migrating from 2.x
+
+Earlier versions changed locale directory paths and namespace names to lowercase.
+
+After upgrading:
+
+- Name locale directories exactly as written in `supportedLocales`.
+- Use the same namespace spelling in configuration, JSON filenames, and translation calls.
+
+If your names are already lowercase everywhere, you do not need to change them.
 
 ## Main Process Setup
 

@@ -154,4 +154,57 @@ describe("I18nService", () => {
         const state = await service.getState();
         expect(state.locale).toBe("en");
     });
+
+    it("preserves configured namespace names throughout the service state", async () => {
+        const root = await mkdtemp(
+            path.join(os.tmpdir(), "i18n-service-case-"),
+        );
+        cleanupCallbacks.push(() => rm(root, { recursive: true, force: true }));
+        const localeDirectory = path.join(root, "pt-BR");
+        await mkdir(localeDirectory, { recursive: true });
+        await writeFile(
+            path.join(localeDirectory, "createProject.json"),
+            JSON.stringify({ title: "Criar projeto" }),
+            "utf8",
+        );
+
+        const options = {
+            localesRoot: root,
+            supportedLocales: ["pt-BR"],
+            namespaces: ["createProject"],
+            fallbackLocale: "pt-BR",
+            initialLocale: "pt-BR",
+            systemLocale: "pt-BR",
+        };
+        const logger = createLogger();
+        const loader = new I18nLoader(logger, options);
+        const service = new I18nService(logger, options, loader);
+
+        await service.onModuleInit();
+
+        expect(await service.getState()).toEqual({
+            locale: "pt-br",
+            fallbackLocale: "pt-br",
+            systemLocale: "pt-br",
+            supportedLocales: ["pt-br"],
+            namespaces: ["createProject"],
+            resources: {
+                createProject: { title: "Criar projeto" },
+            },
+        });
+        expect(service.getNamespaces()).toEqual(["createProject"]);
+        await expect(service.getResources()).resolves.toEqual({
+            createProject: { title: "Criar projeto" },
+        });
+        expect(service.t("createProject:title")).toBe("Criar projeto");
+        expect(service.t("title", { ns: "createProject" })).toBe(
+            "Criar projeto",
+        );
+        expect(service.useTranslations("createProject").namespace).toBe(
+            "createProject",
+        );
+        expect(() => service.useTranslations("createproject")).toThrow(
+            'Unknown translation namespace "createproject"',
+        );
+    });
 });

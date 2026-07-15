@@ -52,7 +52,7 @@ export class I18nService implements OnModuleInit {
         this.instance = i18next.createInstance();
 
         this.namespaces = [
-            ...new Set(options.namespaces.map(normalizeLocaleKey)),
+            ...new Set(options.namespaces.map((namespace) => namespace.trim())),
         ];
 
         this.supportedLocales = [
@@ -92,6 +92,7 @@ export class I18nService implements OnModuleInit {
             resources: {},
             lng: this.locale,
             fallbackLng: this.fallbackLocale,
+            lowerCaseLng: true,
             ns: this.namespaces,
             defaultNS: this.namespaces[0],
             interpolation: {
@@ -236,8 +237,7 @@ export class I18nService implements OnModuleInit {
      * @throws {Error} When namespace is not configured in module options.
      */
     useTranslations(namespace: string): I18nTranslations {
-        const normalizedNamespace = normalizeLocaleKey(namespace);
-        if (!this.namespaces.includes(normalizedNamespace)) {
+        if (!this.namespaces.includes(namespace)) {
             throw new Error(
                 `Unknown translation namespace "${namespace}". Known namespaces: ${this.namespaces.join(", ")}`,
             );
@@ -245,11 +245,11 @@ export class I18nService implements OnModuleInit {
 
         return {
             locale: this.locale,
-            namespace: normalizedNamespace,
+            namespace,
             t: (key: string, options: I18nTranslateOptions = {}) =>
                 this.t(key, {
                     ...options,
-                    ns: normalizedNamespace,
+                    ns: namespace,
                 }),
         };
     }
@@ -316,13 +316,4 @@ export class I18nService implements OnModuleInit {
  */
 function normalizeLocale(locale: string): string {
     return locale.trim().toLowerCase().replaceAll("_", "-");
-}
-
-/**
- * Normalizes namespace keys for lookup.
- * @param value Raw namespace string.
- * @returns Normalized namespace key.
- */
-function normalizeLocaleKey(value: string): string {
-    return value.trim().toLowerCase();
 }
