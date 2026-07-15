@@ -1,5 +1,11 @@
 # @mariodebono/di-app-migrations
 
+## 3.0.0
+
+### Patch Changes
+
+- @mariodebono/di@3.0.0
+
 ## 2.0.0
 
 ### Patch Changes

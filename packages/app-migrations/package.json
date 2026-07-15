@@ -1,6 +1,6 @@
 {
     "name": "@mariodebono/di-app-migrations",
-    "version": "2.0.0",
+    "version": "3.0.0",
     "description": "Application bootstrap migrations for the DI system",
     "private": false,
     "type": "module",

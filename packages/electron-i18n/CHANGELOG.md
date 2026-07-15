@@ -1,5 +1,16 @@
 # @mariodebono/di-electron-i18n
 
+## 3.0.0
+
+### Major Changes
+
+- 01ca19c: Preserve configured locale directory and namespace names throughout resource loading, main-process translation, and renderer bridge state. Resource path names are now case-sensitive and must match their configuration and application usage exactly.
+
+### Patch Changes
+
+- @mariodebono/di@3.0.0
+- @mariodebono/di-electron@3.0.0
+
 ## 2.0.0
 
 ### Patch Changes
