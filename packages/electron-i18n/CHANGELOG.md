@@ -1,5 +1,16 @@
 # @mariodebono/di-electron-i18n
 
+## 3.1.0
+
+### Minor Changes
+
+- de1f0d5: Add Electron 43 compatibility while retaining Electron 42 support.
+
+### Patch Changes
+
+- de1f0d5: Allow compatible same-major DI package combinations.
+- de1f0d5: Refresh the supported i18next dependency range.
+
 ## 3.0.0
 
 ### Major Changes
