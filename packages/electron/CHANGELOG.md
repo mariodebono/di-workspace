@@ -1,5 +1,15 @@
 # @mariodebono/di-electron
 
+## 3.1.0
+
+### Minor Changes
+
+- de1f0d5: Add Electron 43 compatibility while retaining Electron 42 support.
+
+### Patch Changes
+
+- de1f0d5: Allow compatible same-major DI package combinations.
+
 ## 3.0.0
 
 ### Patch Changes

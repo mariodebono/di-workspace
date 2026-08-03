@@ -1,5 +1,12 @@
 # @mariodebono/di-drizzle-sqlite
 
+## 3.1.0
+
+### Patch Changes
+
+- de1f0d5: Refresh the supported LibSQL dependency range.
+- de1f0d5: Allow compatible same-major DI package combinations.
+
 ## 3.0.0
 
 ### Patch Changes
