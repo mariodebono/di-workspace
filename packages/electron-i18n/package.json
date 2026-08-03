@@ -52,9 +52,9 @@
     },
     "peerDependencies": {
         "electron-log": "catalog:",
-        "@mariodebono/di": "workspace:*",
-        "@mariodebono/di-electron": "workspace:*",
-        "electron": "catalog:",
+        "@mariodebono/di": "workspace:^",
+        "@mariodebono/di-electron": "workspace:^",
+        "electron": "^42.6.1 || ^43.2.0",
         "i18next": "catalog:"
     }
 }

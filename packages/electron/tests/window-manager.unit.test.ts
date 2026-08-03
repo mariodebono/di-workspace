@@ -158,21 +158,24 @@ describe("WindowManagerService", () => {
     it.each([
         ["web URL", "https://example.com/dashboard"],
         ["local file", "dist/renderer/index.html"],
-    ])("trusts the configured %s while initial navigation is in progress", async (_description, url) => {
-        const service = createWindowManager();
-        let trustedDuringNavigation = false;
+    ])(
+        "trusts the configured %s while initial navigation is in progress",
+        async (_description, url) => {
+            const service = createWindowManager();
+            let trustedDuringNavigation = false;
 
-        electronMocks.BrowserWindow.onNavigationStart = (window) => {
-            trustedDuringNavigation = service.isTrustedIpcSender(
-                window.webContents as never,
-                window.mainFrame as never,
-            );
-        };
+            electronMocks.BrowserWindow.onNavigationStart = (window) => {
+                trustedDuringNavigation = service.isTrustedIpcSender(
+                    window.webContents as never,
+                    window.mainFrame as never,
+                );
+            };
 
-        await service.createWindow({ url });
+            await service.createWindow({ url });
 
-        expect(trustedDuringNavigation).toBe(true);
-    });
+            expect(trustedDuringNavigation).toBe(true);
+        },
+    );
     it("trusts only managed main frames on the configured web origin", async () => {
         const service = createWindowManager();
 

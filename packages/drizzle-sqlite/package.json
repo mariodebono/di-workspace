@@ -48,6 +48,6 @@
         "reflect-metadata": "catalog:",
         "@libsql/client": "catalog:",
         "drizzle-orm": "catalog:",
-        "@mariodebono/di": "workspace:*"
+        "@mariodebono/di": "workspace:^"
     }
 }

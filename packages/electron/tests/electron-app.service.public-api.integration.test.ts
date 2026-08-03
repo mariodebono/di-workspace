@@ -180,34 +180,34 @@ describe("ElectronAppService", () => {
         expect(mainWindow.setTitleBarOverlay).not.toHaveBeenCalled();
     });
 
-    it.each([
-        "linux",
-        "win32",
-    ])("applies the title bar overlay on %s", async (platform) => {
-        electronMocks.platform.mockReturnValue(platform);
-        const { ElectronAppService } = await import(
-            "../src/electron-app.service.js"
-        );
-        const mainWindow = {
-            setTitleBarOverlay: vi.fn(),
-        };
-        const windowManager = {
-            getMainWindow: vi.fn().mockReturnValue(mainWindow),
-        };
-        const closeBehaviorService = {
-            getHideOnClose: vi.fn().mockReturnValue(false),
-            setHideOnClose: vi.fn(),
-        };
-        const service = new ElectronAppService(
-            windowManager as never,
-            closeBehaviorService as never,
-        );
+    it.each(["linux", "win32"])(
+        "applies the title bar overlay on %s",
+        async (platform) => {
+            electronMocks.platform.mockReturnValue(platform);
+            const { ElectronAppService } = await import(
+                "../src/electron-app.service.js"
+            );
+            const mainWindow = {
+                setTitleBarOverlay: vi.fn(),
+            };
+            const windowManager = {
+                getMainWindow: vi.fn().mockReturnValue(mainWindow),
+            };
+            const closeBehaviorService = {
+                getHideOnClose: vi.fn().mockReturnValue(false),
+                setHideOnClose: vi.fn(),
+            };
+            const service = new ElectronAppService(
+                windowManager as never,
+                closeBehaviorService as never,
+            );
 
-        service.setTheme("#111111ff", "#222222ff");
+            service.setTheme("#111111ff", "#222222ff");
 
-        expect(mainWindow.setTitleBarOverlay).toHaveBeenCalledWith({
-            color: "#222222ff",
-            symbolColor: "#111111ff",
-        });
-    });
+            expect(mainWindow.setTitleBarOverlay).toHaveBeenCalledWith({
+                color: "#222222ff",
+                symbolColor: "#111111ff",
+            });
+        },
+    );
 });

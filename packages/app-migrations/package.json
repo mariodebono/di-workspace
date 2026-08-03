@@ -49,6 +49,6 @@
         "@types/node": "catalog:"
     },
     "peerDependencies": {
-        "@mariodebono/di": "workspace:*"
+        "@mariodebono/di": "workspace:^"
     }
 }

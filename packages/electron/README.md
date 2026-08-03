@@ -15,7 +15,7 @@ npm install @mariodebono/di-electron @mariodebono/di electron reflect-metadata
 ## Requirements
 
 - Node.js 24 or newer
-- An ESM-capable Electron main-process build
+- An ESM-capable Electron main-process build using Electron `^42.6.1` or `^43.2.0`
 - TypeScript legacy decorators enabled when using decorator APIs
 - `reflect-metadata` loaded before decorated classes are instantiated
 - `@mariodebono/di` and `electron` as peer dependencies

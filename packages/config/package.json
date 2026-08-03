@@ -43,7 +43,7 @@
         "prepack": "pnpm run build"
     },
     "peerDependencies": {
-        "@mariodebono/di": "workspace:*"
+        "@mariodebono/di": "workspace:^"
     },
     "devDependencies": {
         "reflect-metadata": "catalog:"

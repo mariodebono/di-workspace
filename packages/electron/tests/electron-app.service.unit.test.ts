@@ -346,23 +346,23 @@ describe("ElectronAppService", () => {
         expect(mainWindow.setTitleBarOverlay).not.toHaveBeenCalled();
     });
 
-    it.each([
-        "linux",
-        "win32",
-    ])("applies the title bar overlay on %s", (platform) => {
-        electronMocks.platform.mockReturnValue(platform);
-        const mainWindow = {
-            setTitleBarOverlay: vi.fn(),
-        };
-        const { appService } = createAppServiceContext(mainWindow);
+    it.each(["linux", "win32"])(
+        "applies the title bar overlay on %s",
+        (platform) => {
+            electronMocks.platform.mockReturnValue(platform);
+            const mainWindow = {
+                setTitleBarOverlay: vi.fn(),
+            };
+            const { appService } = createAppServiceContext(mainWindow);
 
-        appService.setTheme("#111111ff", "#222222ff");
+            appService.setTheme("#111111ff", "#222222ff");
 
-        expect(mainWindow.setTitleBarOverlay).toHaveBeenCalledWith({
-            color: "#222222ff",
-            symbolColor: "#111111ff",
-        });
-    });
+            expect(mainWindow.setTitleBarOverlay).toHaveBeenCalledWith({
+                color: "#222222ff",
+                symbolColor: "#111111ff",
+            });
+        },
+    );
 });
 
 function createAppServiceContext(mainWindow?: object): {
