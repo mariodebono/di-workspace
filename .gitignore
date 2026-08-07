@@ -1,5 +1,6 @@
 # Project
 node_modules
+.pnpm-store/
 dist
 coverage
 .vscode/settings.json
