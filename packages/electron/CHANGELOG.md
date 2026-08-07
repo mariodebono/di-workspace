@@ -1,5 +1,12 @@
 # @mariodebono/di-electron
 
+## 3.2.0
+
+### Minor Changes
+
+- 49a4ab6: Add an `appName` bootstrap option that sets Electron's internal application name before startup.
+- da6bd84: Add Linux `desktopName` bootstrap options that configure Electron's desktop identity before startup.
+
 ## 3.1.0
 
 ### Minor Changes
