@@ -42,6 +42,7 @@ vi.mock("electron/main", () => ({
         exit: vi.fn(),
         on: vi.fn(),
         requestSingleInstanceLock: vi.fn().mockReturnValue(false),
+        setName: vi.fn(),
         whenReady: vi.fn(),
     },
     Menu: {
@@ -113,10 +114,15 @@ describe("application bootstrap", () => {
         class EntryModule {}
 
         const result = await createElectronApplication(EntryModule, {
+            appName: "My App",
             instanceMode: "single",
         });
 
         expect(result).toEqual({ status: "redirected" });
+        expect(electronApp.setName).toHaveBeenCalledWith("My App");
+        expect(electronApp.setName.mock.invocationCallOrder[0]).toBeLessThan(
+            electronApp.requestSingleInstanceLock.mock.invocationCallOrder[0],
+        );
     });
 
     it("covers the bootstrap happy path with an empty application", async () => {

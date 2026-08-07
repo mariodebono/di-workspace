@@ -49,6 +49,8 @@ import {
 /** Options used to configure the Electron application bootstrap. */
 export interface CreateElectronApplicationOptions
     extends CreateApplicationOptions {
+    /** Internal application name passed to Electron before bootstrap begins. */
+    appName?: string;
     /** Whether multiple app instances are allowed (default "multi"). */
     instanceMode?: "multi" | "single";
     /**
@@ -156,6 +158,10 @@ export async function createElectronApplication<T>(
     entryModule: Constructor<T>,
     options?: CreateElectronApplicationOptions,
 ): Promise<CreateElectronApplicationResult> {
+    if (options?.appName !== undefined) {
+        app.setName(options.appName);
+    }
+
     const EntryWithElectron = {
         module: entryModule,
         imports: [ElectronModule],
