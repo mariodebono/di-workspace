@@ -42,6 +42,7 @@ vi.mock("electron/main", () => ({
         exit: vi.fn(),
         on: vi.fn(),
         requestSingleInstanceLock: vi.fn().mockReturnValue(false),
+        setDesktopName: vi.fn(),
         setName: vi.fn(),
         whenReady: vi.fn(),
     },
@@ -102,6 +103,9 @@ vi.mock("../src/ipc.js", () => ({
 
 describe("application bootstrap", () => {
     it("covers the default menu and single-instance redirect branch", async () => {
+        const platformMock = vi
+            .spyOn(process, "platform", "get")
+            .mockReturnValue("linux");
         const { createDefaultApplicationMenu, createElectronApplication } =
             await import("../src/application.js");
 
@@ -115,14 +119,43 @@ describe("application bootstrap", () => {
 
         const result = await createElectronApplication(EntryModule, {
             appName: "My App",
+            desktopName: "com.example.MyApp.desktop",
             instanceMode: "single",
         });
 
         expect(result).toEqual({ status: "redirected" });
         expect(electronApp.setName).toHaveBeenCalledWith("My App");
+        expect(electronApp.setDesktopName).toHaveBeenCalledWith(
+            "com.example.MyApp.desktop",
+        );
         expect(electronApp.setName.mock.invocationCallOrder[0]).toBeLessThan(
             electronApp.requestSingleInstanceLock.mock.invocationCallOrder[0],
         );
+        expect(
+            electronApp.setDesktopName.mock.invocationCallOrder[0],
+        ).toBeLessThan(
+            electronApp.requestSingleInstanceLock.mock.invocationCallOrder[0],
+        );
+        platformMock.mockRestore();
+    });
+
+    it("ignores the desktop name outside Linux", async () => {
+        const platformMock = vi
+            .spyOn(process, "platform", "get")
+            .mockReturnValue("win32");
+        electronApp.requestSingleInstanceLock.mockReturnValue(false);
+        electronApp.setDesktopName.mockClear();
+        const { createElectronApplication } = await import(
+            "../src/application.js"
+        );
+
+        await createElectronApplication(class EntryModule {}, {
+            desktopName: "com.example.MyApp.desktop",
+            instanceMode: "single",
+        });
+
+        expect(electronApp.setDesktopName).not.toHaveBeenCalled();
+        platformMock.mockRestore();
     });
 
     it("covers the bootstrap happy path with an empty application", async () => {
