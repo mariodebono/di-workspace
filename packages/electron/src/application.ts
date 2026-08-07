@@ -51,6 +51,8 @@ export interface CreateElectronApplicationOptions
     extends CreateApplicationOptions {
     /** Internal application name passed to Electron before bootstrap begins. */
     appName?: string;
+    /** Linux desktop filename used for the XDG application ID and WM_CLASS. */
+    desktopName?: string;
     /** Whether multiple app instances are allowed (default "multi"). */
     instanceMode?: "multi" | "single";
     /**
@@ -160,6 +162,9 @@ export async function createElectronApplication<T>(
 ): Promise<CreateElectronApplicationResult> {
     if (options?.appName !== undefined) {
         app.setName(options.appName);
+    }
+    if (process.platform === "linux" && options?.desktopName !== undefined) {
+        app.setDesktopName(options.desktopName);
     }
 
     const EntryWithElectron = {

@@ -88,6 +88,7 @@ class AppModule {}
 
 const result = await createElectronApplication(AppModule, {
     appName: "My App",
+    desktopName: "com.example.MyApp.desktop",
     mainWindowOptions: {
         url: "http://localhost:5173",
         width: 1280,
@@ -121,7 +122,7 @@ The renderer bridge uses the preload transport that `@mariodebono/di-electron` i
 
 At runtime it:
 
-- sets the configured internal Electron application name
+- sets the configured internal Electron application name and Linux desktop identity
 - creates the DI application
 - registers all `BridgeController()` handlers with `ipcMain.handle()`
 - collects app-ready, app-launch, and window lifecycle handlers
@@ -140,6 +141,7 @@ If `instanceMode: "single"` is enabled and Electron cannot acquire the single-in
 `createElectronApplication()` accepts the normal `@mariodebono/di` application options plus Electron-specific settings.
 
 - `appName?: string` sets Electron's internal application name before bootstrap begins; it does not configure OS-level application metadata
+- `desktopName?: string` sets the Linux `.desktop` filename before bootstrap so the XDG application ID and `WM_CLASS` can match the installed desktop entry; it is ignored on other platforms
 - `instanceMode?: "multi" | "single"` controls whether a second app instance is allowed
 - `hideOnClose?: boolean` hides the main window instead of quitting when it is closed
 - `mainWindowOptions?: CreateWindowOptions` configures the main `BrowserWindow`
