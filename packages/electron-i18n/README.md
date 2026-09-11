@@ -13,10 +13,12 @@ npm install @mariodebono/di-electron-i18n @mariodebono/di @mariodebono/di-electr
 ## Requirements
 
 - Node.js 24 or newer
-- An ESM-capable Electron main-process build using Electron `^42.6.1` or `^43.2.0`
+- An ESM-capable Electron main-process build using Electron `^42.6.1`, `^43.2.0`, or `^44.3.0`
 - TypeScript legacy decorators enabled when using decorator APIs
 - `@mariodebono/di`, `@mariodebono/di-electron`, `electron`, `electron-log`, and `i18next` as peer dependencies
 - `reflect-metadata` loaded before decorated classes are instantiated
+
+The package is developed against Electron 44.3.0, but applications can continue using any supported peer version. Electron 44 requires macOS 13 or newer and no longer supports 32-bit Windows or Linux armv7l.
 
 This package publishes ESM `.mjs` files and `.d.mts` declarations for the root entry and renderer subpath. CommonJS `require()` is not a supported entry point.
 

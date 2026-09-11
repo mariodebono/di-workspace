@@ -107,7 +107,7 @@ describe("WindowManagerService", () => {
             "https://example.com",
         );
         expect(mainWindow).toBeDefined();
-        expect(service.createMainWindow({ url: "/other" })).resolves.toBe(
+        await expect(service.createMainWindow({ url: "/other" })).resolves.toBe(
             mainWindow,
         );
 
