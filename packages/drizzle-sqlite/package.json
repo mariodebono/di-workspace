@@ -46,8 +46,8 @@
     "dependencies": {},
     "peerDependencies": {
         "reflect-metadata": "catalog:",
-        "@libsql/client": "catalog:",
-        "drizzle-orm": "catalog:",
+        "@libsql/client": "^0.17.4 || ^0.18.0",
+        "drizzle-orm": "^0.45.2",
         "@mariodebono/di": "workspace:^"
     }
 }

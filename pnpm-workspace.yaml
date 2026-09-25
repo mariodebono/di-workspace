@@ -6,20 +6,20 @@ allowBuilds:
   esbuild: true
 
 catalog:
-  "@libsql/client": "^0.17.4"
-  "@types/node": "^24.13.4"
-  "drizzle-orm": "^0.45.2"
-  "electron": "^44.3.0"
+  "@libsql/client": "^0.18.0"
+  "@types/node": "^24.13.6"
+  "drizzle-orm": "^0.45.3"
+  "electron": "^44.4.5"
   "electron-log": "^5.4.4"
   "i18next": "^26.4.2"
   "reflect-metadata": "^0.2.2"
 
-  "vitest": "^5.0.0"
-  "@biomejs/biome": "^2.5.13"
-  "@vitest/coverage-v8": "^5.0.0"
+  "vitest": "^5.0.1"
+  "@biomejs/biome": "^2.5.14"
+  "@vitest/coverage-v8": "^5.0.1"
   "publint": "^0.3.24"
   "tsdown": "^0.23.0"
-  "@changesets/cli": "^3.0.2"
+  "@changesets/cli": "^3.0.3"
   "typescript": "^6.0.3"
 
 catalogMode: prefer
