@@ -1,5 +1,11 @@
 # @mariodebono/di
 
+## 3.3.0
+
+### Patch Changes
+
+- 1fbc98a: Refresh shared build and test dependencies and the audited lockfile while retaining Node 24, TypeScript 6, and pnpm 11.
+
 ## 3.2.0
 
 ## 3.1.0

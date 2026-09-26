@@ -1,5 +1,16 @@
 # @mariodebono/di-electron-i18n
 
+## 3.3.0
+
+### Minor Changes
+
+- 3643e71: Add Electron 44 support while retaining compatibility with Electron 42 and 43.
+
+### Patch Changes
+
+- 1fbc98a: Refresh shared build and test dependencies and the audited lockfile while retaining Node 24, TypeScript 6, and pnpm 11.
+- 1fbc98a: Accept all stable Electron 42, 43, and 44 releases in the peer dependency ranges.
+
 ## 3.2.0
 
 ## 3.1.0

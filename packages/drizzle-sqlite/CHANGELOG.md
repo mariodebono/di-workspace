@@ -1,5 +1,12 @@
 # @mariodebono/di-drizzle-sqlite
 
+## 3.3.0
+
+### Patch Changes
+
+- 1fbc98a: Refresh shared build and test dependencies and the audited lockfile while retaining Node 24, TypeScript 6, and pnpm 11.
+- 1fbc98a: Support LibSQL 0.18 while retaining compatibility with LibSQL 0.17 and Drizzle ORM 0.45.2.
+
 ## 3.2.0
 
 ## 3.1.0
