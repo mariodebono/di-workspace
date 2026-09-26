@@ -15,12 +15,12 @@ npm install @mariodebono/di-electron @mariodebono/di electron reflect-metadata
 ## Requirements
 
 - Node.js 24 or newer
-- An ESM-capable Electron main-process build using Electron `^42.6.1`, `^43.2.0`, or `^44.3.0`
+- An ESM-capable Electron main-process build using Electron `^42`, `^43`, or `^44`
 - TypeScript legacy decorators enabled when using decorator APIs
 - `reflect-metadata` loaded before decorated classes are instantiated
 - `@mariodebono/di` and `electron` as peer dependencies
 
-The package is developed against Electron 44.3.0, but applications can continue using any supported peer version. Electron 44 requires macOS 13 or newer and no longer supports 32-bit Windows or Linux armv7l.
+The package is developed against Electron 44.4.5, but applications can continue using any supported peer version. Electron 44 requires macOS 13 or newer and no longer supports 32-bit Windows or Linux armv7l.
 
 This package publishes ESM `.mjs` files, `.d.mts` declarations, and a CommonJS preload bundle used internally by the window manager. CommonJS `require()` is not a supported public entry point.
 

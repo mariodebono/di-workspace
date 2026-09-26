@@ -54,7 +54,7 @@
         "electron-log": "catalog:",
         "@mariodebono/di": "workspace:^",
         "@mariodebono/di-electron": "workspace:^",
-        "electron": "^42.6.1 || ^43.2.0 || ^44.3.0",
+        "electron": "^42 || ^43 || ^44",
         "i18next": "catalog:"
     }
 }
