@@ -1,5 +1,9 @@
 # @mariodebono/di-electron
 
+## 3.3.1
+
+No changes in this release.
+
 ## 3.3.0
 
 ### Minor Changes
