@@ -130,16 +130,7 @@ export function applyValidation<
               }
             | undefined;
 
-        if (schema?.validate) {
-            const result = schema.validate(
-                config,
-                options.validationOptions ?? {},
-            );
-            if (result.error) {
-                throw result.error;
-            }
-            return result.value;
-        }
+        // Zod also exposes a boolean validate(); prefer APIs that return parsed data.
         if (schema?.safeParse) {
             const result = schema.safeParse(config);
             if (!result.success) {
@@ -149,6 +140,16 @@ export function applyValidation<
         }
         if (schema?.parse) {
             return schema.parse(config);
+        }
+        if (schema?.validate) {
+            const result = schema.validate(
+                config,
+                options.validationOptions ?? {},
+            );
+            if (result.error) {
+                throw result.error;
+            }
+            return result.value;
         }
     }
 

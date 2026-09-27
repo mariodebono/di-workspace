@@ -8,6 +8,7 @@
 
 import { createApplication, Inject, Injectable, Module } from "@mariodebono/di";
 import { describe, expect, expectTypeOf, it } from "vitest";
+import { z } from "zod";
 import {
     ConfigModule,
     type ConfigType,
@@ -21,6 +22,46 @@ import {
 } from "./helpers.js";
 
 describe("ConfigModule", () => {
+    it("delivers parsed Zod configuration to ConfigService during bootstrap", async () => {
+        const schema = z.object({
+            port: z.coerce.number().int().positive(),
+            host: z.string().default("localhost"),
+        });
+        @Module({
+            imports: [
+                ConfigModule.forRoot({
+                    ignoreEnvVars: true,
+                    defaults: { port: "3000" },
+                    validationSchema: schema,
+                }),
+            ],
+        })
+        class RootModule {}
+
+        const app = await createApplication(RootModule);
+        try {
+            const config = app.get(ConfigService);
+            expect(config.getAll()).toEqual({ port: 3000, host: "localhost" });
+        } finally {
+            app.destroy();
+        }
+    });
+
+    it("rejects bootstrap when Zod configuration is invalid", async () => {
+        @Module({
+            imports: [
+                ConfigModule.forRoot({
+                    ignoreEnvVars: true,
+                    defaults: { port: "invalid" },
+                    validationSchema: z.object({ port: z.coerce.number() }),
+                }),
+            ],
+        })
+        class RootModule {}
+
+        await expect(createApplication(RootModule)).rejects.toThrow();
+    });
+
     it("loads process.env before load factories and allows factories to override", () => {
         const previous = process.env.GODOT_LAUNCHER_FOO;
         process.env.GODOT_LAUNCHER_FOO = "from-process-env";
