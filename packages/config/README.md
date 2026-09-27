@@ -178,6 +178,8 @@ Common methods:
 
 Root config can be transformed or validated with a custom `validate()` function or a schema object that exposes `parse()`, `safeParse()`, or Joi-style `validate()`.
 
+The custom `validate` callback takes priority. For schemas, `safeParse()` is preferred, followed by `parse()`, then Joi-style `validate()`. This supports Zod schemas that also expose a boolean-returning `validate()` method while preserving parsed values, defaults and transforms. Validation failures are thrown during configuration loading.
+
 ```ts
 ConfigModule.forRoot({
     load: [databaseConfig],

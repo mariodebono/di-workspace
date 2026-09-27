@@ -7,6 +7,7 @@
  */
 
 import { describe, expect, it } from "vitest";
+import { z } from "zod";
 import { ConfigService } from "../src/config.service.js";
 import type { ConfigFactory } from "../src/config.types.js";
 import {
@@ -23,6 +24,59 @@ type NamespaceProvider = {
 };
 
 describe("config utils", () => {
+    it("preserves Zod coercion, defaults and transforms when validate also exists", () => {
+        const schema = z.object({
+            port: z.coerce.number().int().positive(),
+            host: z.string().default("localhost"),
+            name: z.string().transform((value) => value.trim()),
+        });
+        expect(typeof schema.validate).toBe("function");
+        expect(
+            applyValidation(normalizeOptions({ validationSchema: schema }), {
+                port: "3000",
+                name: " app ",
+            }),
+        ).toEqual({ port: 3000, host: "localhost", name: "app" });
+    });
+
+    it("throws a Zod error for invalid configuration", () => {
+        const schema = z.object({ port: z.coerce.number().int().positive() });
+        expect(() =>
+            applyValidation(normalizeOptions({ validationSchema: schema }), {
+                port: "invalid",
+            }),
+        ).toThrow(z.ZodError);
+    });
+
+    it("keeps the explicit validate callback ahead of a Zod schema", () => {
+        const schema = z.object({ port: z.number() });
+        expect(
+            applyValidation(
+                normalizeOptions({
+                    validationSchema: schema,
+                    validate: () => ({ port: 8080 }),
+                }),
+                { port: "invalid" },
+            ),
+        ).toEqual({ port: 8080 });
+    });
+
+    it("prefers parse over validate when safeParse is absent", () => {
+        expect(
+            applyValidation(
+                normalizeOptions({
+                    validationSchema: {
+                        parse: () => ({ port: 3000 }),
+                        validate: () => {
+                            throw new Error("validate must not be called");
+                        },
+                    },
+                }),
+                {},
+            ),
+        ).toEqual({ port: 3000 });
+    });
+
     it("normalizes option defaults", () => {
         expect(normalizeOptions({})).toMatchObject({
             cache: true,
