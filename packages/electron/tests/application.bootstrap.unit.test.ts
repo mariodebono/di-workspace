@@ -41,6 +41,7 @@ vi.mock("electron/main", () => ({
     app: {
         exit: vi.fn(),
         on: vi.fn(),
+        removeListener: vi.fn(),
         requestSingleInstanceLock: vi.fn().mockReturnValue(false),
         setDesktopName: vi.fn(),
         setName: vi.fn(),

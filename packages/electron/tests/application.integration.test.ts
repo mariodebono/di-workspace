@@ -899,14 +899,14 @@ describe("createElectronApplication", () => {
     it("does not convert app quit flow into hide behavior", async () => {
         const logger = createMockLogger();
         const listeners: {
-            beforeQuit?: VoidListener;
+            beforeQuit?: MainWindowCloseListener;
             close?: MainWindowCloseListener;
         } = {};
         const hide = vi.fn();
 
         mockElectronAppOn((event, listener) => {
             if (event === "before-quit") {
-                listeners.beforeQuit = listener as VoidListener;
+                listeners.beforeQuit = listener as MainWindowCloseListener;
             }
         });
         vi.spyOn(electronMainApp, "whenReady").mockResolvedValue(undefined);
@@ -939,7 +939,7 @@ describe("createElectronApplication", () => {
         await requireValue(
             listeners.beforeQuit,
             "Expected before-quit listener to be registered",
-        )();
+        )({ preventDefault: vi.fn() });
         const preventDefault = vi.fn();
         await requireValue(
             listeners.close,
@@ -957,7 +957,7 @@ describe("createElectronApplication", () => {
         const logger = createMockLogger();
         const executionOrder: string[] = [];
         const listeners: {
-            beforeQuit?: VoidListener;
+            beforeQuit?: MainWindowCloseListener;
             blur?: VoidListener;
             close?: MainWindowCloseListener;
             focus?: VoidListener;
@@ -969,7 +969,7 @@ describe("createElectronApplication", () => {
 
         mockElectronAppOn((event, listener) => {
             if (event === "before-quit") {
-                listeners.beforeQuit = listener as VoidListener;
+                listeners.beforeQuit = listener as MainWindowCloseListener;
             }
         });
         vi.spyOn(electronMainApp, "whenReady").mockResolvedValue(undefined);
@@ -1137,7 +1137,7 @@ describe("createElectronApplication", () => {
         await requireValue(
             listeners.beforeQuit,
             "Expected before-quit listener to be registered",
-        )();
+        )({ preventDefault: vi.fn() });
         await Promise.resolve();
         await Promise.resolve();
 
@@ -1176,12 +1176,12 @@ describe("createElectronApplication", () => {
         const logger = createMockLogger();
         const executionOrder: string[] = [];
         const listeners: {
-            beforeQuit?: VoidListener;
+            beforeQuit?: MainWindowCloseListener;
         } = {};
 
         mockElectronAppOn((event, listener) => {
             if (event === "before-quit") {
-                listeners.beforeQuit = listener as VoidListener;
+                listeners.beforeQuit = listener as MainWindowCloseListener;
             }
         });
         vi.spyOn(electronMainApp, "whenReady").mockResolvedValue(undefined);
@@ -1227,8 +1227,8 @@ describe("createElectronApplication", () => {
             listeners.beforeQuit,
             "Expected before-quit listener to be registered",
         );
-        await beforeQuit();
-        await beforeQuit();
+        await beforeQuit({ preventDefault: vi.fn() });
+        await beforeQuit({ preventDefault: vi.fn() });
         await Promise.resolve();
         await Promise.resolve();
 

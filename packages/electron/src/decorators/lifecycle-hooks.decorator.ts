@@ -26,6 +26,14 @@ export interface LifecycleHookOptions {
     order?: LifecycleHookOrder;
 }
 
+/** Options for a cancellable lifecycle permission check. */
+export interface LifecycleGuardOptions {
+    priority?: number;
+}
+
+/** A guard must explicitly allow or cancel the requested action. */
+export type LifecycleGuardResult = boolean | Promise<boolean>;
+
 /** Metadata stored for each lifecycle hook handler. */
 export interface LifecycleHookMetadata {
     methodName: string | symbol;
@@ -39,6 +47,13 @@ export const LIFECYCLE_HOOK_INJECTABLE_TAG = Symbol(
 );
 /** Metadata key used to store app-quit hook definitions. */
 export const APP_QUIT_METADATA_KEY = Symbol("platform:electron:app-quit");
+const BEFORE_APP_QUIT_METADATA_KEY = Symbol(
+    "platform:electron:before-app-quit",
+);
+const BEFORE_MAIN_WINDOW_CLOSE_METADATA_KEY = Symbol(
+    "platform:electron:before-main-window-close",
+);
+
 /** Metadata key used to store main-window-close hook definitions. */
 export const MAIN_WINDOW_CLOSE_METADATA_KEY = Symbol(
     "platform:electron:main-window-close",
@@ -55,6 +70,31 @@ export const MAIN_WINDOW_BLUR_METADATA_KEY = Symbol(
 export const MAIN_WINDOW_SHOW_METADATA_KEY = Symbol(
     "platform:electron:main-window-show",
 );
+
+/**
+ * Reads app-quit guards for a provider token.
+ *
+ * @param token - Provider token to inspect.
+ */
+export function getBeforeAppQuitGuards(
+    token: ProviderToken,
+): LifecycleHookMetadata[] {
+    return getLifecycleHookHandlers(token, BEFORE_APP_QUIT_METADATA_KEY);
+}
+
+/**
+ * Reads main-window close guards for a provider token.
+ *
+ * @param token - Provider token to inspect.
+ */
+export function getBeforeMainWindowCloseGuards(
+    token: ProviderToken,
+): LifecycleHookMetadata[] {
+    return getLifecycleHookHandlers(
+        token,
+        BEFORE_MAIN_WINDOW_CLOSE_METADATA_KEY,
+    );
+}
 
 /**
  * Reads app-quit hook metadata for a provider token.
@@ -107,6 +147,43 @@ export function getMainWindowShowHooks(
     token: ProviderToken,
 ): LifecycleHookMetadata[] {
     return getLifecycleHookHandlers(token, MAIN_WINDOW_SHOW_METADATA_KEY);
+}
+
+/**
+ * Checks permission to quit before app-quit hooks run. Return true to allow it.
+ *
+ * @param options - Guard priority, in ascending order.
+ */
+export function BeforeAppQuit(
+    options: LifecycleGuardOptions = {},
+): MethodDecorator {
+    return createLifecycleHookDecorator(
+        BEFORE_APP_QUIT_METADATA_KEY,
+        "@BeforeAppQuit",
+        {
+            priority: options.priority,
+            order: LifecycleHookOrder.Before,
+        },
+    );
+}
+
+/**
+ * Checks permission to close or hide the main window. Return true to allow it.
+ * This guard is skipped during an approved application quit; use BeforeAppQuit too.
+ *
+ * @param options - Guard priority, in ascending order.
+ */
+export function BeforeMainWindowClose(
+    options: LifecycleGuardOptions = {},
+): MethodDecorator {
+    return createLifecycleHookDecorator(
+        BEFORE_MAIN_WINDOW_CLOSE_METADATA_KEY,
+        "@BeforeMainWindowClose",
+        {
+            priority: options.priority,
+            order: LifecycleHookOrder.Before,
+        },
+    );
 }
 
 /**

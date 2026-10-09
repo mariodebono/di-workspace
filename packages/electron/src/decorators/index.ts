@@ -20,6 +20,10 @@ export {
     IpcHandleTyped,
 } from "./ipc.decorator.js";
 export {
+    BeforeAppQuit,
+    BeforeMainWindowClose,
+    type LifecycleGuardOptions,
+    type LifecycleGuardResult,
     LifecycleHookOrder,
     OnAppQuit,
     OnMainWindowBlur,

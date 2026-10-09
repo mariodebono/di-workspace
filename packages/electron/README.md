@@ -236,6 +236,68 @@ Each accepts:
 
 These hooks are also awaited sequentially and sorted by ascending priority.
 
+### Close and Quit Guards
+
+Use `@BeforeAppQuit()` to check permission before normal application quit, and
+`@BeforeMainWindowClose()` to check permission before closing or hiding the managed
+main window. Both accept `{ priority?: number }` and return `boolean` or
+`Promise<boolean>`. Return `true` to allow the action or `false` to cancel it.
+
+```ts
+import { Inject, Injectable } from "@mariodebono/di";
+import {
+    BeforeAppQuit,
+    BeforeMainWindowClose,
+} from "@mariodebono/di-electron";
+
+@Injectable()
+class OperationsService {
+    busy = false;
+}
+
+@Injectable()
+class ExitPolicy {
+    constructor(@Inject(OperationsService) private readonly operations: OperationsService) {}
+
+    @BeforeAppQuit()
+    @BeforeMainWindowClose()
+    canExit(): boolean {
+        return !this.operations.busy;
+    }
+}
+```
+
+Register both providers in your module. Your application owns the busy state and
+any message or confirmation dialog. Set the state before starting critical work,
+and clear it in `finally` when the work finishes or fails. An async guard can await
+an application-owned confirmation dialog before returning its decision.
+
+Guards run sequentially in ascending priority and then discovery order. The first
+`false` cancels the action. A thrown error, rejected promise or non-boolean result
+is logged and also cancels it. Existing lifecycle hooks keep their notification
+semantics; their return values do not cancel anything.
+
+The package prevents the native action synchronously while guards are pending.
+Repeated requests share the pending check. Quit hooks run only after quit permission
+is granted; close hooks run only after close permission is granted. A cancelled
+attempt is not queued: the next request checks permission again. A guard that never
+settles keeps the action blocked, so guards should return promptly or wait only for
+a deliberate user decision.
+
+An allowed window close retains `hideOnClose` behaviour. If it requests application
+quit, quit guards must also approve. During an approved application quit, main-window
+close guards are skipped to avoid a second permission cycle. Register both guards
+when protecting work from both Close and Quit. A close guard alone does not veto Quit.
+
+Normal menu Quit, keyboard Quit and `ElectronAppService.quit()` use the quit guards.
+Force quit, crashes, system shutdown and `app.exit()` cannot be reliably blocked.
+Updater installation needs a separate permission check before `quitAndInstall()`:
+Electron can close windows before emitting `before-quit` for that operation. Keep
+recovery mechanisms for interrupted work. See the
+[Electron application lifecycle](https://www.electronjs.org/docs/latest/api/app#event-before-quit).
+
+Applications without guards retain their existing close and quit behaviour.
+
 ## IPC Controllers
 
 IPC is controller-based. Classes marked with `@BridgeController({ namespace })` are discovered from the DI container, then methods marked with `@IpcHandleTyped()` or a decorator created by `createIpcHandleTyped()` are registered through `ipcMain.handle()`.
