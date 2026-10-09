@@ -9,15 +9,15 @@ catalog:
   "@libsql/client": "^0.18.0"
   "@types/node": "^24.13.6"
   "drizzle-orm": "^0.45.3"
-  "electron": "^44.4.5"
+  "electron": "^44.7.0"
   "electron-log": "^5.4.4"
   "i18next": "^26.4.2"
   "reflect-metadata": "^0.2.2"
 
-  "vitest": "^5.0.2"
-  "@biomejs/biome": "^2.5.14"
-  "@vitest/coverage-v8": "^5.0.2"
-  "publint": "^0.3.24"
+  "vitest": "^5.0.3"
+  "@vitest/coverage-v8": "^5.0.3"
+  "@biomejs/biome": "^2.5.15"
+  "publint": "^0.3.25"
   "tsdown": "^0.23.0"
   "@changesets/cli": "^3.0.3"
   "typescript": "^6.0.3"
@@ -35,6 +35,8 @@ minimumReleaseAgeExclude:
 overrides:
   js-yaml@<3.15.0: ^3.15.0
   postcss@<=8.5.17: ^8.5.18
+  shell-quote@>=1.8.4 <1.11.0: ^1.11.0
+  source-map-js@>=1.0.0 <1.2.2: ^1.2.2
   vite@>=8.0.0 <=8.0.15: 8.0.16
   ws@>=8.0.0 <8.20.1: ^8.20.1
   ws@>=8.0.0 <8.21.0: ^8.21.0
