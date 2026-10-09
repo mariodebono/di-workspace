@@ -43,6 +43,10 @@ interface LifecycleHookRunnerOptions {
 }
 
 interface LifecycleHookRunner {
+    runGuards(
+        invocations: LifecycleInvocation[],
+        hookName: "@BeforeAppQuit" | "@BeforeMainWindowClose",
+    ): Promise<boolean>;
     collectAppReadyInvocations(application: Application): AppReadyInvocation[];
     collectLifecycleInvocations(
         application: Application,
@@ -124,6 +128,45 @@ export function createLifecycleHookRunner(
     };
 
     return {
+        /**
+         * Runs permission checks sequentially, stopping on a veto or failure.
+         *
+         * @param invocations - Pre-collected guard invocations.
+         * @param hookName - Decorator name used in diagnostics.
+         */
+        async runGuards(invocations, hookName): Promise<boolean> {
+            const handlers = [...invocations].sort(
+                (left, right) =>
+                    left.priority - right.priority || left.index - right.index,
+            );
+            for (const handler of handlers) {
+                const name = `${handler.className}.${String(handler.methodName)}`;
+                try {
+                    const method = Reflect.get(
+                        handler.instance,
+                        handler.methodName,
+                    );
+                    if (typeof method !== "function") {
+                        throw new TypeError(
+                            `${hookName} handler is not callable: ${name}`,
+                        );
+                    }
+                    const result: unknown = await method.call(handler.instance);
+                    if (typeof result !== "boolean") {
+                        throw new TypeError(
+                            `${hookName} handler must return a boolean: ${name}`,
+                        );
+                    }
+                    if (!result) return false;
+                } catch (error) {
+                    options
+                        .logger()
+                        ?.error?.(`${hookName} handler failed: ${name}`, error);
+                    return false;
+                }
+            }
+            return true;
+        },
         /**
          * Collects app-ready handler invocations from the application container.
          *

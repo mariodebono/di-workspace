@@ -88,6 +88,15 @@ describe("package exports", () => {
         const appLaunchDecorators = await import(
             "../src/decorators/app-launch.decorator.js"
         );
+        const lifecycleDecorators = await import(
+            "../src/decorators/lifecycle-hooks.decorator.js"
+        );
+        expect(decoratorsIndex.BeforeAppQuit).toBe(
+            lifecycleDecorators.BeforeAppQuit,
+        );
+        expect(decoratorsIndex.BeforeMainWindowClose).toBe(
+            lifecycleDecorators.BeforeMainWindowClose,
+        );
 
         expect(decoratorsIndex.IpcHandle).toBe(ipcDecorators.IpcHandle);
         expect(decoratorsIndex.BridgeController).toBe(
@@ -109,6 +118,8 @@ describe("package exports", () => {
         expect(indexModule.createElectronApplication).toBe(
             applicationModule.createElectronApplication,
         );
+        expect(indexModule.BeforeAppQuit).toBeTypeOf("function");
+        expect(indexModule.BeforeMainWindowClose).toBeTypeOf("function");
         expect(indexModule.ElectronLogger).toBe(loggerModule.ElectronLogger);
         expect(indexModule.createElectronLogger).toBe(
             loggerModule.createElectronLogger,

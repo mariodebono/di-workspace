@@ -14,15 +14,18 @@ import {
     Logger,
     type LogLevel,
 } from "@mariodebono/di";
-import { app, Menu } from "electron/main";
+import { app, type BrowserWindow, Menu } from "electron/main";
 import {
     collectAppLaunchInvocations,
     createAppLaunchCoordinator,
 } from "./app-launch-runner.js";
+import { createAppQuitCoordinator } from "./app-quit-coordinator.js";
 import { CloseBehaviorService } from "./close-behavior.service.js";
 import { AppReadyOrder } from "./decorators/app-ready.decorator.js";
 import {
     getAppQuitHooks,
+    getBeforeAppQuitGuards,
+    getBeforeMainWindowCloseGuards,
     getMainWindowBlurHooks,
     getMainWindowCloseHooks,
     getMainWindowFocusHooks,
@@ -192,6 +195,7 @@ export async function createElectronApplication<T>(
         logger: () => logger,
     });
     let logger!: Logger;
+    let cleanupLifecycle = (): void => {};
 
     if (instanceMode === "single" && !app.requestSingleInstanceLock()) {
         app.exit(0);
@@ -252,6 +256,107 @@ export async function createElectronApplication<T>(
                 getMainWindowShowHooks,
             );
 
+        const appQuitGuards = lifecycleRunner.collectLifecycleInvocations(
+            application,
+            getBeforeAppQuitGuards,
+        );
+        const mainWindowCloseGuards =
+            lifecycleRunner.collectLifecycleInvocations(
+                application,
+                getBeforeMainWindowCloseGuards,
+            );
+        const guarded =
+            appQuitGuards.length > 0 || mainWindowCloseGuards.length > 0;
+        let closePending: Promise<void> | undefined;
+        let closeHooksHandledForQuit = false;
+        let lifecycleDisposed = false;
+        const quitCoordinator = createAppQuitCoordinator({
+            guarded,
+            check: () =>
+                lifecycleRunner.runGuards(appQuitGuards, "@BeforeAppQuit"),
+            notify: async () => {
+                await lifecycleRunner.runAppQuitHooks(
+                    appQuitInvocations,
+                    LifecycleHookOrder.Before,
+                );
+                await lifecycleRunner.runAppQuitHooks(
+                    appQuitInvocations,
+                    LifecycleHookOrder.After,
+                );
+            },
+            quit: () => app.quit(),
+            waitForClose: () => closePending,
+            logger,
+        });
+        const windowCleanups = new Set<() => void>();
+        const watchedWindows = new WeakSet<BrowserWindow>();
+        /**
+         * Clears quit approval when a native window or renderer cancels closing.
+         *
+         * @param window - A window participating in application quit.
+         */
+        const watchWindow = (window: BrowserWindow): void => {
+            if (!guarded || watchedWindows.has(window)) return;
+            watchedWindows.add(window);
+            const contents = window.webContents;
+            const cancelQuit = (): void => {
+                quitCoordinator.cancel();
+                closeHooksHandledForQuit = false;
+            };
+            const onClose = (event: Electron.Event): void => {
+                if (!quitCoordinator.isQuitting()) return;
+                queueMicrotask(() => {
+                    if (!lifecycleDisposed && event.defaultPrevented)
+                        cancelQuit();
+                });
+            };
+            const onPreventUnload = (event: Electron.Event): void => {
+                if (!quitCoordinator.isQuitting()) return;
+                queueMicrotask(() => {
+                    // Preventing this event explicitly allows the window to close.
+                    if (!lifecycleDisposed && !event.defaultPrevented)
+                        cancelQuit();
+                });
+            };
+            window.on("close", onClose);
+            contents?.on("will-prevent-unload", onPreventUnload);
+            const cleanup = (): void => {
+                window.removeListener?.("close", onClose);
+                window.removeListener?.("closed", cleanup);
+                contents?.removeListener(
+                    "will-prevent-unload",
+                    onPreventUnload,
+                );
+                windowCleanups.delete(cleanup);
+            };
+            window.on("closed", cleanup);
+            windowCleanups.add(cleanup);
+        };
+        const beforeQuit = (event: Electron.Event): void | Promise<void> => {
+            const attempt = quitCoordinator.beforeQuit(event);
+            if (attempt) {
+                void attempt.then(() => {
+                    if (!quitCoordinator.isQuitting())
+                        closeHooksHandledForQuit = false;
+                });
+            }
+            return attempt;
+        };
+        const onWindowCreated = (
+            _event: Electron.Event,
+            window: BrowserWindow,
+        ): void => watchWindow(window);
+        app.on("before-quit", beforeQuit);
+        if (guarded) app.on("browser-window-created", onWindowCreated);
+        cleanupLifecycle = (): void => {
+            lifecycleDisposed = true;
+            quitCoordinator.dispose();
+            app.removeListener("before-quit", beforeQuit);
+            if (guarded)
+                app.removeListener("browser-window-created", onWindowCreated);
+            for (const cleanup of windowCleanups) cleanup();
+        };
+
         Menu.setApplicationMenu(createDefaultApplicationMenu());
         await app.whenReady();
         await lifecycleRunner.runAppReadyHandlers(
@@ -271,67 +376,73 @@ export async function createElectronApplication<T>(
         const mainWindow = await windowManager.createMainWindow(
             createMainWindowOptions,
         );
-        await lifecycleRunner.runAppReadyHandlers(
-            appReadyInvocations,
-            AppReadyOrder.AfterWindow,
-        );
-        await launchCoordinator.dispatchInitialLaunch();
 
-        let isQuitting = false;
-        let hasRunAppQuitHooks = false;
-
-        if (mainWindow) {
-            app.on("before-quit", () => {
-                isQuitting = true;
-                if (hasRunAppQuitHooks) {
+        /** Registers window callbacks before guarded application startup work. */
+        const registerMainWindowLifecycle = (): void => {
+            if (!mainWindow) return;
+            watchWindow(mainWindow);
+            /** Executes close callbacks after the main-window guards approve. */
+            const close = async (): Promise<void> => {
+                if (
+                    mainWindowCloseGuards.length &&
+                    !(await lifecycleRunner.runGuards(
+                        mainWindowCloseGuards,
+                        "@BeforeMainWindowClose",
+                    ))
+                )
                     return;
-                }
-                hasRunAppQuitHooks = true;
-                void (async () => {
-                    await lifecycleRunner.runAppQuitHooks(
-                        appQuitInvocations,
-                        LifecycleHookOrder.Before,
-                    );
-                    await lifecycleRunner.runAppQuitHooks(
-                        appQuitInvocations,
-                        LifecycleHookOrder.After,
-                    );
-                })();
-            });
-
-            mainWindow.on("close", async (event) => {
-                if (!isQuitting) {
-                    event.preventDefault();
-                }
-
+                if (lifecycleDisposed || quitCoordinator.isPending()) return;
                 await lifecycleRunner.runMainWindowCloseHooks(
                     mainWindowCloseInvocations,
                     LifecycleHookOrder.Before,
                 );
-
-                if (isQuitting || mainWindow.isDestroyed()) {
+                if (lifecycleDisposed) return;
+                if (quitCoordinator.isQuitting() || mainWindow.isDestroyed()) {
                     await lifecycleRunner.runMainWindowCloseHooks(
                         mainWindowCloseInvocations,
                         LifecycleHookOrder.After,
                     );
                     return;
                 }
-
-                if (closeBehaviorService.getHideOnClose()) {
+                if (quitCoordinator.isPending()) {
+                    closeHooksHandledForQuit = true;
+                } else if (closeBehaviorService.getHideOnClose()) {
                     mainWindow.hide();
-                    await lifecycleRunner.runMainWindowCloseHooks(
-                        mainWindowCloseInvocations,
-                        LifecycleHookOrder.After,
-                    );
-                    return;
+                } else {
+                    closeHooksHandledForQuit = guarded;
+                    app.quit();
                 }
-
-                isQuitting = true;
-                app.quit();
                 await lifecycleRunner.runMainWindowCloseHooks(
                     mainWindowCloseInvocations,
                     LifecycleHookOrder.After,
                 );
+            };
+            mainWindow.on("close", (event) => {
+                if (lifecycleDisposed || event.defaultPrevented) return;
+                if (quitCoordinator.isQuitting()) {
+                    if (guarded && closeHooksHandledForQuit) return;
+                    return (async () => {
+                        await lifecycleRunner.runMainWindowCloseHooks(
+                            mainWindowCloseInvocations,
+                            LifecycleHookOrder.Before,
+                        );
+                        await lifecycleRunner.runMainWindowCloseHooks(
+                            mainWindowCloseInvocations,
+                            LifecycleHookOrder.After,
+                        );
+                    })();
+                }
+                event.preventDefault();
+                if (quitCoordinator.isPending()) return;
+                if (!guarded) return close();
+                if (!closePending) {
+                    closePending = Promise.resolve()
+                        .then(close)
+                        .finally(() => {
+                            closePending = undefined;
+                        });
+                }
+                return closePending;
             });
 
             mainWindow.on("show", async () => {
@@ -366,16 +477,26 @@ export async function createElectronApplication<T>(
                     LifecycleHookOrder.After,
                 );
             });
-        }
+        };
+
+        if (guarded) registerMainWindowLifecycle();
+        await lifecycleRunner.runAppReadyHandlers(
+            appReadyInvocations,
+            AppReadyOrder.AfterWindow,
+        );
+        await launchCoordinator.dispatchInitialLaunch();
+        if (!guarded) registerMainWindowLifecycle();
 
         const originalDestroy = application.destroy.bind(application);
         const originalDestroyAsync = application.destroyAsync.bind(application);
 
         application.destroy = (): void => {
+            cleanupLifecycle();
             launchCoordinator.cleanup();
             originalDestroy();
         };
         application.destroyAsync = async (): Promise<void> => {
+            cleanupLifecycle();
             launchCoordinator.cleanup();
             await originalDestroyAsync();
         };
@@ -385,6 +506,7 @@ export async function createElectronApplication<T>(
             application,
         };
     } catch (error) {
+        cleanupLifecycle();
         launchCoordinator.cleanup();
         throw error;
     }
