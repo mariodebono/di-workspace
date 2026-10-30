@@ -90,7 +90,10 @@ Use `AppMigrationsModule.forRoot()` when the store is available at module defini
 
 ```ts
 import { Module } from "@mariodebono/di";
-import { AppMigration, AppMigrationsModule } from "@mariodebono/di-app-migrations";
+import {
+    AppMigration,
+    AppMigrationsModule,
+} from "@mariodebono/di-app-migrations";
 
 class MigrationStore {
     async listCompletedMigrationIds(): Promise<string[]> {

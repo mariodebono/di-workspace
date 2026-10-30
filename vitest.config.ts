@@ -12,6 +12,12 @@ import { defineConfig } from "vitest/config";
 const workspaceRoot = fileURLToPath(new URL(".", import.meta.url));
 
 export default defineConfig({
+    oxc: {
+        decorator: {
+            legacy: true,
+            emitDecoratorMetadata: true,
+        },
+    },
     resolve: {
         alias: [
             {

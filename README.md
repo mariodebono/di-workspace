@@ -6,14 +6,14 @@ This repository publishes ESM packages under the `@mariodebono` scope. The found
 
 ## Packages
 
-| Package | Documentation | Purpose |
-| --- | --- | --- |
-| `@mariodebono/di` | [packages/di](packages/di/README.md) | Core DI container, application bootstrap, decorators, lifecycle hooks, logging, and testing helpers. |
-| `@mariodebono/di-config` | [packages/config](packages/config/README.md) | Typed configuration module with namespaces, dot-path access, validation, and async root setup. |
-| `@mariodebono/di-app-migrations` | [packages/app-migrations](packages/app-migrations/README.md) | Application bootstrap migrations for user data, settings, and local app state. |
-| `@mariodebono/di-drizzle-sqlite` | [packages/drizzle-sqlite](packages/drizzle-sqlite/README.md) | Drizzle ORM and LibSQL integration for SQLite-backed applications. |
-| `@mariodebono/di-electron` | [packages/electron](packages/electron/README.md) | Electron main-process bootstrap, window management, lifecycle hooks, IPC, and renderer bridge. |
-| `@mariodebono/di-electron-i18n` | [packages/electron-i18n](packages/electron-i18n/README.md) | Electron i18n module with typed main-process and renderer APIs built on `i18next`. |
+| Package                          | Documentation                                                | Purpose                                                                                              |
+| -------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| `@mariodebono/di`                | [packages/di](packages/di/README.md)                         | Core DI container, application bootstrap, decorators, lifecycle hooks, logging, and testing helpers. |
+| `@mariodebono/di-config`         | [packages/config](packages/config/README.md)                 | Typed configuration module with namespaces, dot-path access, validation, and async root setup.       |
+| `@mariodebono/di-app-migrations` | [packages/app-migrations](packages/app-migrations/README.md) | Application bootstrap migrations for user data, settings, and local app state.                       |
+| `@mariodebono/di-drizzle-sqlite` | [packages/drizzle-sqlite](packages/drizzle-sqlite/README.md) | Drizzle ORM and LibSQL integration for SQLite-backed applications.                                   |
+| `@mariodebono/di-electron`       | [packages/electron](packages/electron/README.md)             | Electron main-process bootstrap, window management, lifecycle hooks, IPC, and renderer bridge.       |
+| `@mariodebono/di-electron-i18n`  | [packages/electron-i18n](packages/electron-i18n/README.md)   | Electron i18n module with typed main-process and renderer APIs built on `i18next`.                   |
 
 ## Requirements
 
@@ -30,13 +30,13 @@ Applications that use decorators should enable decorator metadata. Exact module 
 
 ```json
 {
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
-  }
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true
+    }
 }
 ```
 
@@ -65,12 +65,7 @@ Package-specific READMEs document the peer dependencies, runtime assumptions, su
 
 ```ts
 import "reflect-metadata";
-import {
-    createApplication,
-    Inject,
-    Injectable,
-    Module,
-} from "@mariodebono/di";
+import { createApplication, Inject, Injectable, Module } from "@mariodebono/di";
 
 @Injectable()
 class UserService {
