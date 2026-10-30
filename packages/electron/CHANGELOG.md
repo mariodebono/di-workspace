@@ -1,5 +1,11 @@
 # @mariodebono/di-electron
 
+## 3.4.1
+
+### Patch Changes
+
+- e397518: Add support for Electron 45 while retaining support for Electron 42, 43, and 44. Refresh the supported i18next dependency.
+
 ## 3.4.0
 
 ### Minor Changes
