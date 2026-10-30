@@ -13,12 +13,12 @@ npm install @mariodebono/di-electron-i18n @mariodebono/di @mariodebono/di-electr
 ## Requirements
 
 - Node.js 24 or newer
-- An ESM-capable Electron main-process build using Electron `^42`, `^43`, or `^44`
+- An ESM-capable Electron main-process build using Electron `^42`, `^43`, `^44`, or `^45`
 - TypeScript legacy decorators enabled when using decorator APIs
 - `@mariodebono/di`, `@mariodebono/di-electron`, `electron`, `electron-log`, and `i18next` as peer dependencies
 - `reflect-metadata` loaded before decorated classes are instantiated
 
-The package is developed against Electron 44.4.5, but applications can continue using any supported peer version. Electron 44 requires macOS 13 or newer and no longer supports 32-bit Windows or Linux armv7l.
+The package is developed against Electron 45.1.0, but applications can continue using any supported peer version. Electron 44 and newer require macOS 13 or newer and no longer support 32-bit Windows or Linux armv7l.
 
 This package publishes ESM `.mjs` files and `.d.mts` declarations for the root entry and renderer subpath. CommonJS `require()` is not a supported entry point.
 
@@ -28,13 +28,13 @@ Use the same decorator setup required by `@mariodebono/di` and `@mariodebono/di-
 
 ```json
 {
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
-  }
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true
+    }
 }
 ```
 
@@ -66,8 +66,8 @@ Each namespace file must contain a JSON object.
 
 ```json
 {
-  "appTitle": "My App",
-  "greeting": "Hello"
+    "appTitle": "My App",
+    "greeting": "Hello"
 }
 ```
 
@@ -169,15 +169,15 @@ import { I18nService } from "@mariodebono/di-electron-i18n";
 
 @Injectable()
 class GreetingService {
-	constructor(private readonly i18n: I18nService) {}
+    constructor(private readonly i18n: I18nService) {}
 
-	getGreeting(): string {
-		return this.i18n.t("greeting", { ns: "common" });
-	}
+    getGreeting(): string {
+        return this.i18n.t("greeting", { ns: "common" });
+    }
 
-	getCommonTranslations() {
-		return this.i18n.useTranslations("common");
-	}
+    getCommonTranslations() {
+        return this.i18n.useTranslations("common");
+    }
 }
 ```
 
@@ -208,18 +208,21 @@ Use `@OnLocaleChanged()` on injectable instance methods that should run after yo
 
 ```ts
 import { Injectable } from "@mariodebono/di";
-import { OnLocaleChanged, type I18nLocaleChangedEvent } from "@mariodebono/di-electron-i18n";
+import {
+    OnLocaleChanged,
+    type I18nLocaleChangedEvent,
+} from "@mariodebono/di-electron-i18n";
 
 @Injectable()
 class LocaleSettingsStore {
-	@OnLocaleChanged()
-	async persistLocaleChange(event: I18nLocaleChangedEvent): Promise<void> {
-		console.log(
-			event.previousLocale,
-			event.requestedLocale,
-			event.resolvedLocale,
-		);
-	}
+    @OnLocaleChanged()
+    async persistLocaleChange(event: I18nLocaleChangedEvent): Promise<void> {
+        console.log(
+            event.previousLocale,
+            event.requestedLocale,
+            event.resolvedLocale,
+        );
+    }
 }
 ```
 
@@ -233,15 +236,15 @@ The hook runner discovers injectable classes tagged by `@OnLocaleChanged()`, sor
 import { createI18nLocaleChangedHookRunner } from "@mariodebono/di-electron-i18n";
 
 const runner = createI18nLocaleChangedHookRunner({
-	logger: () => logger,
+    logger: () => logger,
 });
 
 const invocations = runner.collectLocaleChangedInvocations(application);
 
 await runner.runLocaleChangedHandlers(invocations, {
-	previousLocale: "en",
-	requestedLocale: "fr",
-	resolvedLocale: "fr",
+    previousLocale: "en",
+    requestedLocale: "fr",
+    resolvedLocale: "fr",
 });
 ```
 
@@ -264,7 +267,7 @@ const state = await i18n.getState();
 await i18n.setLocale("fr");
 
 function handleLocaleChanged(event) {
-	console.log(event.previousLocale, event.resolvedLocale);
+    console.log(event.previousLocale, event.resolvedLocale);
 }
 
 events.onLocaleChanged(handleLocaleChanged);

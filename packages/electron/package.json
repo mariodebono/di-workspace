@@ -50,6 +50,6 @@
     },
     "peerDependencies": {
         "@mariodebono/di": "workspace:^",
-        "electron": "^42 || ^43 || ^44"
+        "electron": "^42 || ^43 || ^44 || ^45"
     }
 }

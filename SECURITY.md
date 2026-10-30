@@ -4,13 +4,13 @@
 
 Security fixes are provided for the latest published major version of each package.
 
-| Package | Supported |
-| --- | --- |
-| `@mariodebono/di` | Latest major |
-| `@mariodebono/di-config` | Latest major |
+| Package                          | Supported    |
+| -------------------------------- | ------------ |
+| `@mariodebono/di`                | Latest major |
+| `@mariodebono/di-config`         | Latest major |
 | `@mariodebono/di-app-migrations` | Latest major |
-| `@mariodebono/di-electron` | Latest major |
-| `@mariodebono/di-electron-i18n` | Latest major |
+| `@mariodebono/di-electron`       | Latest major |
+| `@mariodebono/di-electron-i18n`  | Latest major |
 | `@mariodebono/di-drizzle-sqlite` | Latest major |
 
 ## Reporting a Vulnerability

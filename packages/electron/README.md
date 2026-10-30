@@ -15,12 +15,12 @@ npm install @mariodebono/di-electron @mariodebono/di electron reflect-metadata
 ## Requirements
 
 - Node.js 24 or newer
-- An ESM-capable Electron main-process build using Electron `^42`, `^43`, or `^44`
+- An ESM-capable Electron main-process build using Electron `^42`, `^43`, `^44`, or `^45`
 - TypeScript legacy decorators enabled when using decorator APIs
 - `reflect-metadata` loaded before decorated classes are instantiated
 - `@mariodebono/di` and `electron` as peer dependencies
 
-The package is developed against Electron 44.4.5, but applications can continue using any supported peer version. Electron 44 requires macOS 13 or newer and no longer supports 32-bit Windows or Linux armv7l.
+The package is developed against Electron 45.1.0, but applications can continue using any supported peer version. Electron 44 and newer require macOS 13 or newer and no longer support 32-bit Windows or Linux armv7l.
 
 This package publishes ESM `.mjs` files, `.d.mts` declarations, and a CommonJS preload bundle used internally by the window manager. CommonJS `require()` is not a supported public entry point.
 
@@ -30,13 +30,13 @@ Use the same decorator setup required by `@mariodebono/di`:
 
 ```json
 {
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
-  }
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true
+    }
 }
 ```
 
@@ -245,10 +245,7 @@ main window. Both accept `{ priority?: number }` and return `boolean` or
 
 ```ts
 import { Inject, Injectable } from "@mariodebono/di";
-import {
-    BeforeAppQuit,
-    BeforeMainWindowClose,
-} from "@mariodebono/di-electron";
+import { BeforeAppQuit, BeforeMainWindowClose } from "@mariodebono/di-electron";
 
 @Injectable()
 class OperationsService {
@@ -257,7 +254,10 @@ class OperationsService {
 
 @Injectable()
 class ExitPolicy {
-    constructor(@Inject(OperationsService) private readonly operations: OperationsService) {}
+    constructor(
+        @Inject(OperationsService)
+        private readonly operations: OperationsService,
+    ) {}
 
     @BeforeAppQuit()
     @BeforeMainWindowClose()
@@ -305,7 +305,10 @@ IPC is controller-based. Classes marked with `@BridgeController({ namespace })` 
 Before a controller method runs, the package verifies that the sender belongs to a window managed by `WindowManagerService`, that the request comes from its main frame, and that the frame remains on the configured web origin or local renderer file. Invalid senders receive a normalized `electron.invalid_ipc_sender` error. Use `ipcEventValidator` only for additional application-specific rules.
 
 ```ts
-import { BridgeController, createIpcHandleTyped } from "@mariodebono/di-electron";
+import {
+    BridgeController,
+    createIpcHandleTyped,
+} from "@mariodebono/di-electron";
 
 type ProjectsBridge = {
     list(): Promise<string[]>;

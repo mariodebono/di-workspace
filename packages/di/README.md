@@ -25,13 +25,13 @@ If you rely on constructor metadata, enable decorator metadata in your applicati
 
 ```json
 {
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
-  }
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true
+    }
 }
 ```
 
@@ -60,12 +60,7 @@ The package exports the core building blocks for a DI-driven application:
 
 ```ts
 import "reflect-metadata";
-import {
-    createApplication,
-    Inject,
-    Injectable,
-    Module,
-} from "@mariodebono/di";
+import { createApplication, Inject, Injectable, Module } from "@mariodebono/di";
 
 @Injectable()
 class UserService {
@@ -235,9 +230,7 @@ Use `createTestingApp()` for isolated unit tests.
 ```ts
 import { createTestingApp } from "@mariodebono/di";
 
-const app = createTestingApp([
-    { provide: "VALUE", useValue: 123 },
-]);
+const app = createTestingApp([{ provide: "VALUE", useValue: 123 }]);
 
 expect(app.get("VALUE")).toBe(123);
 app.teardown();
